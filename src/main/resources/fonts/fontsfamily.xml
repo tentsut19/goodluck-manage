@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+   <fontFamily name="AngsanaUPC">
+       <normal><![CDATA[fonts/angsau.ttf]]></normal>
+       <bold><![CDATA[fonts/angsaub.ttf]]></bold>
+       <italic><![CDATA[fonts/angsaui.ttf]]></italic>
+       <boldItalic><![CDATA[fonts/angsauz.ttf]]></boldItalic>
+       <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+       <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+   </fontFamily>
+   <fontFamily name="CordiaUPC">
+       <normal><![CDATA[fonts/cordiau.ttf]]></normal>
+       <bold><![CDATA[fonts/cordiaub.ttf]]></bold>
+       <italic><![CDATA[fonts/cordiaui.ttf]]></italic>
+       <boldItalic><![CDATA[fonts/cordiauz.ttf]]></boldItalic>
+       <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+       <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+   </fontFamily>
+   <fontFamily name="THSarabunPSK">
+       <normal><![CDATA[fonts/THSarabun.ttf]]></normal>
+       <bold><![CDATA[fonts/THSarabun Bold.ttf]]></bold>
+       <italic><![CDATA[fonts/THSarabun Italic.ttf]]></italic>
+       <boldItalic><![CDATA[fonts/THSarabun BoldItalic.ttf]]></boldItalic>
+       <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+       <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+       <exportFonts/>
+   </fontFamily>
+    <fontFamily name="DejaVu Sans">
+        <normal><![CDATA[fonts/DejaVuSans.ttf]]></normal>
+        <bold><![CDATA[fonts/DejaVuSans-Bold.ttf]]></bold>
+        <italic><![CDATA[fonts/DejaVuSans-Oblique.ttf]]></italic>
+        <boldItalic><![CDATA[fonts/DejaVuSans-BoldOblique.ttf]]></boldItalic>
+        <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+        <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+        <exportFonts/>
+    </fontFamily>
+</fontFamilies>

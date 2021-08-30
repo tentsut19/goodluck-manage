@@ -1,0 +1,34 @@
+#  Template maven-build
+
+#  This template allows you to test and build your Java project with Maven.
+#  The workflow allows running tests, code checkstyle and security scans on the default branch.
+
+# Prerequisites: pom.xml and appropriate project structure should exist in the repository.
+
+image: maven:3.6.3
+
+pipelines:
+  tags:
+    deploy-*:
+      - step:
+          name: Build and Deploy
+          caches:
+            - maven
+          script:
+            - mvn -B verify --file pom.xml
+            - pwd
+            - ls
+            - cd target
+          artifacts:
+            - target/**
+          after-script:
+              # Collect checkstyle results, if any, and convert to Bitbucket Code Insights.
+            - pipe: atlassian/ftp-deploy:0.3.5
+              variables:
+                USER: root
+                PASSWORD: F9Qe422jqr #$FTP_PASSWORD
+                SERVER: noc.easynet.co.th
+                REMOTE_PATH: /api/test
+                LOCAL_PATH: $(pwd)/target
+                # LOCAL_PATH: /target
+                # EXTRA_ARGS: "--exclude=filename_to_exclude.txt --exclude=folder_to_exclude/"

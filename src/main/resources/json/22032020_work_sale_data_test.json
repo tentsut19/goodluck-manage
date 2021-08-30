@@ -1,0 +1,100 @@
+{
+  "workType": 3,
+  "status": "D",
+  "personnelId": 1,
+  "worksalecontractRequest": {},
+  "workSaleQuotationRequestList": [
+    {
+      "idTemplate":1,
+      "quotationDetail": "Wifi Hotspot 5G เต็มระบบทั้งอาคาร",
+      "parent": 0,
+      "seq": 1,
+      "amount": 100.5,
+      "quantity": 1
+    },
+    {
+      "idTemplate":2,
+      "quotationDetail": "จัดทำคูปองตามที่ลูกค้าต้องการตลอดอายุสัญญา",
+      "parent": 1,
+      "seq": 1,
+      "amount": 50,
+      "quantity": 1
+    }
+  ],
+  "worksalesurveyRequestList": [
+    {
+      "customerName": "คุณสามารถ ว่องไว",
+      "customerTel": "0883339689",
+      "customerLine": "NickPisit9999",
+      "customerDate": "10022020",
+      "buildingPlan": 1,
+      "buildingName": "Test",
+      "buildingQuantity": 1,
+      "buildingRoomQuantity": 200,
+      "buildingFloorQuantity": 3,
+      "buildingFrontType": "A",
+      "buildingStatus": "1",
+      "buildingNewPercent": 100,
+      "buildingStartMounth": 2,
+      "buildingStartYear": 1,
+      "buildingType": 1,
+      "buildingTypeOther": "wwww",
+      "oldSystem": "1",
+      "oldSystemOther": "ww",
+      "oldSystemVender": "ee",
+      "oldSystemTel": "0999993938",
+      "oldSystemHardareAge": 23,
+      "oldSystemRadiusVender": "fff",
+      "oldSystemApVender": "ggggg",
+      "oldSystemContractStatus": "1",
+      "oldSystemRemain": 2,
+      "oldSystemType": "1",
+      "internetStatus": "1",
+      "internetNerwork": "ttt",
+      "internetQuantityNumber": 2,
+      "internetPackage": "hhhh",
+      "internetPerPrice": 232,
+      "easynetConfirm": "A",
+      "easynetOther": "ggg",
+      "easynetCusResponsible": "aaa",
+      "easynetCusResponsibleVender": "gggg",
+      "easynetIsp1": "isp1",
+      "easynetIsp2": "isp2",
+      "cablingType": "w",
+      "cablingRailSize": 2,
+      "cablingRailPrice": 22,
+      "cablingPipeSize": 3,
+      "cablingPipePrice": 33,
+      "dvr": "dvr",
+      "dvrOther": "dve other",
+      "dvrCode": "dve0001",
+      "internetFixedIp": "1",
+      "internetFixedIpPrice": 333.55,
+      "otherDescription": "test",
+      "worksaleassetsRequestList": [
+        {
+          "id": null,
+          "name": "202003221347u5FOxAo2aa.jpg",
+          "pathPhoto": "c:\\temp\\images\\WORK_SALE_SURVEY\\20200322\\202003221347u5FOxAo2aa.jpg",
+          "pathUrl": null,
+          "isDeleted": null,
+          "createdDate": null,
+          "createdBy": null,
+          "updatedDate": null,
+          "updatedBy": null
+        },
+        {
+          "id": null,
+          "name": "202003221347CRCLieUMH0.jfif",
+          "pathPhoto": "c:\\temp\\images\\WORK_SALE_SURVEY\\20200322\\202003221347CRCLieUMH0.jfif",
+          "pathUrl": null,
+          "isDeleted": null,
+          "createdDate": null,
+          "createdBy": null,
+          "updatedDate": null,
+          "updatedBy": null
+        }
+      ]
+    }
+  ]
+}

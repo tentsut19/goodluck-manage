@@ -1,0 +1,137 @@
+info:
+  app:
+    name: ${project.name}
+    description: ${project.description}
+    version: ${project.version}
+  contact:
+    domain: Test
+    team: Cabsat
+
+mail:
+  message-subject: Test Subject
+  personal: Test
+  sender: ${MAIL_USERNAME:tentsut19@gmail.com}
+  recipients:
+    username: Test
+    email: tentsut19@gmail.com
+report-location: classpath:reports
+storage-location: classpath:/reports
+#report-location: ${user.home}/Project/cabsat/api/cabsat_api/reports
+#storage-location: file:${user.home}/Project/cabsat/api/cabsat_api/src/main/resources/reports
+report-generate-path: ${user.home}/temp/pdf
+
+server:
+  port: ${PORT:8092}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:tentsut19@gmail.com}
+    password: ${MAIL_PASSWORD:jzsgpmgegelrtoyn}
+    test-connection: true
+    properties:
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.ssl.enable: false
+      mail.smtp.auth: true
+  # Enable gracefule shutdown
+  shutdown: graceful
+  
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.mariadb.jdbc.Driver
+#    url: jdbc:mariadb://localhost:3306/goodluck_db
+    url: jdbc:mariadb://comvisitor.cvysc3moexiz.ap-southeast-1.rds.amazonaws.com/goodluck_db
+    username: root
+#    password: root
+    password: comvisitor1234
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 180000
+  jpa:
+    hibernate.ddl-auto: none
+    hibernate.use-new-id-generator-mappings: false
+  jackson.time-zone: Asia/Bangkok
+  # Allow grace timeout period for 20 seconds
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+  ## MULTIPART (MultipartProperties)
+  # Enable multipart uploads
+#  spring.servlet.multipart.enabled=true
+  # Threshold after which files are written to disk.
+#  spring.servlet.multipart.file-size-threshold=2KB
+  # Max file size.
+#  spring.servlet.multipart.max-file-size=200MB
+  # Max Request Size
+#  spring.servlet.multipart.max-request-size=215MB
+  ## File Storage Properties
+#  file.upload-dir=./uploads
+
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+file:
+  upload-video-dir: ${user.home}/temp/uploads/video
+
+
+logging:
+  file: 'docker-elk/logs/cabsat.log'
+  pattern:
+#    console: '%d{ISO8601} | %highlight(%-5level) | %t | %cyan(%class{0}) | %M | %L | %m%n'
+#    file: '%d{ISO8601} | %highlight(%-5level) | %t | %cyan(%class{0}) | %M | %L | %m%n'
+    console: '%d{yyyy-MM-dd HH:mm:ss} | [%thread] | %highlight(%-5level) | %cyan(%class{0}) | %boldMagenta(%X{X-B3-TraceId}) | %green(%X{UserId}) | %M | %L | - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} | [%thread] | %-5level | %class{0} | %X{X-B3-TraceId} | %X{UserId} | %M | %L | - %msg%n'
+#  level:
+#    org.springframework.web: ERROR
+#    com.howtodoinjava: DEBUG
+#    org.hibernate: DEBUG
+#    level.org.springframework.web: TRACE
+#    level.org.springframework.request.client.MessageTracing.sent: TRACE
+#    level.org.springframework.request.server.MessageTracing.sent: TRACE
+#    level.org.springframework.request.client.MessageTracing.received: TRACE
+#    level.org.springframework.request.server.MessageTracing.received: TRACE
+
+
+#  level:
+#    org.springframework.web: ERROR
+#    com.howtodoinjava: DEBUG
+#    org.hibernate: ERROR
+
+
+
+#logging:
+#  file: 'log/cabsat.log'
+#  pattern:
+#    file: '%d{yyyy-MM-dd HH:mm:ss}'
+#    console: '%d{ISO8601} | %highlight(%-5level) | %t | %cyan(%class{0}) | %M | %L | %m%n'
+#  level:
+#    org.springframework.web: ERROR
+#    com.howtodoinjava: DEBUG
+#    org.hibernate: ERROR
+#    level.org.springframework.web: TRACE
+#    level.org.springframework.request.client.MessageTracing.sent: TRACE
+#    level.org.springframework.request.server.MessageTracing.sent: TRACE
+#    level.org.springframework.request.client.MessageTracing.received: TRACE
+#    level.org.springframework.request.server.MessageTracing.received: TRACE
+
+environment: local
+
+image:
+  upload:
+    dir: ${user.home}/temp/images
+
+line.bot:
+  channel-token: 'MIDdakLlxUjYcUDHNANxa6d4J0Qrq6UO6wm6JL9F1o85fKRa/WwMPLjSxK537bt/9bmbgMoUetW//0fPrA7r4Lk4EjTJe5Nos/6A9jqDX021UrbyaYx563b854xgkHMLvm+Mwwmq85g6W5Z4VGRIKwdB04t89/1O/w1cDnyilFU=
+'
+  channel-secret: 'ca2567ff1e60717a78013248c365f3f2'
+  handler.path: /callback
+
+terms-of-service.path: ${user.home}/temp/pdf/terms-of-service/F-SA-013.pdf
