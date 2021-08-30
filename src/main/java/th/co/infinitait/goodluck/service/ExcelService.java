@@ -46,7 +46,8 @@ public class ExcelService {
                     Optional<OrderEntity> optional = orderRepository.findByRecipientName(orderRequest.getRecipientName());
                     if(optional.isPresent()){
                         OrderEntity orderEntity = optional.get();
-                        if(orderEntity.getStatus().equalsIgnoreCase("Draft")){
+                        if(orderEntity.getStatus().equalsIgnoreCase("Draft") ||
+                                orderEntity.getStatus().equalsIgnoreCase("Shipping")){
                             orderEntity.setParcelCode(orderRequest.getParcelCode());
                             orderEntity.setStatus("Shipping");
                             orderEntity.setUpdatedBy(cabsatPayload.getUserId());
@@ -55,13 +56,14 @@ public class ExcelService {
 
                             OrderResponse orderResponse = new OrderResponse();
                             orderResponse.setStatus("success");
+                            orderResponse.setTotalAmount(orderEntity.getTotalAmount());
                             orderResponse.setParcelCode(orderRequest.getParcelCode());
                             orderResponse.setRecipientName(orderRequest.getRecipientName());
                             orderResponseList.add(orderResponse);
                         }else{
                             OrderResponse orderResponse = new OrderResponse();
                             orderResponse.setStatus("fail");
-                            orderResponse.setErrorMessage("ชื่อผู้รับนี้กำลังจัดส่ง");
+                            orderResponse.setErrorMessage("รายการสินค้าของชื่อผู้รับนี้ไม่อยํ่ในสถานะแบบร่างหรือกำลังจัดส่ง");
                             orderResponse.setParcelCode(orderRequest.getParcelCode());
                             orderResponse.setRecipientName(orderRequest.getRecipientName());
                             orderResponseList.add(orderResponse);
@@ -113,6 +115,7 @@ public class ExcelService {
 
                         OrderResponse orderResponse = new OrderResponse();
                         orderResponse.setStatus("success");
+                        orderResponse.setTotalAmount(orderEntity.getTotalAmount());
                         orderResponse.setParcelCode(orderRequest.getParcelCode());
                         orderResponse.setRecipientName(orderRequest.getRecipientName());
                         orderResponseList.add(orderResponse);

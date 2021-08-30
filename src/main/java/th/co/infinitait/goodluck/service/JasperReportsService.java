@@ -12,9 +12,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import th.co.infinitait.goodluck.entity.CustomerEntity;
 import th.co.infinitait.goodluck.entity.OrderEntity;
+import th.co.infinitait.goodluck.entity.OrderProductEntity;
+import th.co.infinitait.goodluck.entity.SettingProductEntity;
 import th.co.infinitait.goodluck.exception.InvalidParameterException;
 import th.co.infinitait.goodluck.model.OrderDetailReport;
+import th.co.infinitait.goodluck.repository.OrderProductRepository;
 import th.co.infinitait.goodluck.repository.OrderRepository;
+import th.co.infinitait.goodluck.repository.SettingProductRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,6 +39,10 @@ public class JasperReportsService {
 	private final FileSystemStorageService storageService;
 
 	private final OrderRepository orderRepository;
+
+	private final OrderProductRepository orderProductRepository;
+
+	private final SettingProductRepository settingProductRepository;
 
 	@Value("${report-generate-path}")
 	private String pdfFilePath;
@@ -84,14 +92,32 @@ public class JasperReportsService {
 				if(!optional.isPresent()){
 					continue;
 				}
+				BigDecimal allPrice = BigDecimal.ZERO;
+				BigDecimal discountPrice = BigDecimal.ZERO;
+				BigDecimal shippingCostPrice = new BigDecimal("60");
 				OrderEntity orderEntity = optional.get();
-				String productDraftName = orderEntity.getProductDraftName();
-				if(!StringUtils.isEmpty(productDraftName)) {
-					String[] productDraftNames = productDraftName.split(",");
-					for(String productName:productDraftNames){
+				List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
+				if(!CollectionUtils.isEmpty(orderProductEntityList)) {
+					int no = 1;
+					for(OrderProductEntity orderProductEntity:orderProductEntityList) {
 						OrderDetailReport orderDetailReport = new OrderDetailReport();
-						orderDetailReport.setDescription(productName);
-						orderDetailReport.setQuantity(orderEntity.getQuantity() + "");
+						orderDetailReport.setNo((no++)+"");
+						orderDetailReport.setDescription(orderProductEntity.getProductName());
+						orderDetailReport.setQuantity(orderProductEntity.getProductQuantity() + "");
+						String unitPrice = "0.00";
+						String amount = "0.00";
+						List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
+						if (!CollectionUtils.isEmpty(settingProductEntityList)) {
+							SettingProductEntity settingProductEntity = settingProductEntityList.get(settingProductEntityList.size() - 1);
+							BigDecimal productPrice = settingProductEntity.getPrice();
+							if (productPrice != null) {
+								unitPrice = df.format(productPrice);
+								amount = df.format(productPrice.multiply(new BigDecimal(orderProductEntity.getProductQuantity())));
+							}
+							allPrice = allPrice.add(productPrice);
+						}
+						orderDetailReport.setUnitPrice(unitPrice);
+						orderDetailReport.setAmount(amount);
 						orderDetailReportList.add(orderDetailReport);
 					}
 				}
@@ -120,8 +146,16 @@ public class JasperReportsService {
 				params.put("customerAddress", "ที่อยู่ : " + customerAddress);
 				params.put("date", "วันที่ : "+formattedDate);
 
-				params.put("all", df.format(orderEntity.getTotalAmount()) + " บาท");
-				params.put("discount", "0.00 บาท");
+				BigDecimal totalNetPrice = allPrice.add(shippingCostPrice);
+
+				BigDecimal shippingCostPriceAdd = orderEntity.getTotalAmount().subtract(totalNetPrice);
+				if(shippingCostPriceAdd.compareTo(BigDecimal.ZERO) > 0){
+					shippingCostPrice = shippingCostPrice.add(shippingCostPriceAdd);
+				}
+
+				params.put("all", df.format(allPrice) + " บาท");
+				params.put("discount", df.format(discountPrice) + " บาท");
+				params.put("shippingCost", df.format(shippingCostPrice) + " บาท");
 				params.put("totalNetPrice", df.format(orderEntity.getTotalAmount()) + " บาท");
 
 				BigDecimal notVat = orderEntity.getTotalAmount().multiply(new BigDecimal("100"));

@@ -4,17 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import th.co.infinitait.goodluck.entity.OrderEntity;
+import th.co.infinitait.goodluck.entity.OrderProductEntity;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface OrderProductRepository extends JpaRepository<OrderEntity, Long> {
+public interface OrderProductRepository extends JpaRepository<OrderProductEntity, Long> {
 
-    @Query(value = "SELECT * FROM tb_order " +
-            "WHERE recipient_name = :recipientName ", nativeQuery = true)
-    Optional<OrderEntity> findByRecipientName(@Param("recipientName")String recipientName);
-
-    @Query(value = "SELECT * FROM tb_order " +
-            "WHERE parcel_code = :parcelCode ", nativeQuery = true)
-    Optional<OrderEntity> findByParcelCode(@Param("parcelCode")String parcelCode);
+    @Query(value = "SELECT * FROM tb_order_product " +
+            "WHERE order_code = :orderCode ", nativeQuery = true)
+    List<OrderProductEntity> findByOrderCode(@Param("orderCode")String orderCode);
 
 }

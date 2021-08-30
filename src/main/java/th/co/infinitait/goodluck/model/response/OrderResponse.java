@@ -2,6 +2,7 @@ package th.co.infinitait.goodluck.model.response;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Builder
@@ -15,6 +16,7 @@ public class OrderResponse {
     private String errorMessage;
     private String parcelCode;
     private String recipientName;
+    private BigDecimal totalAmount;
     private Date deletedAt;
     private Date createdAt;
     private String createdBy;

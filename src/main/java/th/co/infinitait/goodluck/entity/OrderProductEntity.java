@@ -56,7 +56,7 @@ public class OrderProductEntity {
     private String productColor;
 
     @Column(name = "product_quantity")
-    private String productQuantity;
+    private Integer productQuantity;
 
     @Column(name = "line_user_id")
     private String lineUserId;
