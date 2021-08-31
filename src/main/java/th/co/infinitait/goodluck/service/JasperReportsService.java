@@ -157,13 +157,19 @@ public class JasperReportsService {
 					shippingCostPrice = shippingCostPrice.add(shippingCostPriceAdd);
 				}
 
+				BigDecimal amountDiff = orderEntity.getTotalAmount().subtract(allPrice);
+				if(shippingCostPriceAdd.compareTo(BigDecimal.ZERO) <= 0){
+					shippingCostPrice = BigDecimal.ZERO;
+					discountPrice = amountDiff;
+				}
+
 				params.put("all", df.format(allPrice) + " บาท");
 				params.put("discount", df.format(discountPrice) + " บาท");
 				params.put("shippingCost", df.format(shippingCostPrice) + " บาท");
 				params.put("totalNetPrice", df.format(orderEntity.getTotalAmount()) + " บาท");
 
 				BigDecimal notVat = orderEntity.getTotalAmount().multiply(new BigDecimal("100"));
-				notVat = notVat.divide(new BigDecimal("107"), RoundingMode.CEILING);
+				notVat = notVat.divide(new BigDecimal("107"), RoundingMode.HALF_UP);
 
 				BigDecimal vat = orderEntity.getTotalAmount().subtract(notVat);
 

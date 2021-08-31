@@ -420,7 +420,7 @@
 				<textFieldExpression><![CDATA[$P{discount}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="292" y="55" width="120" height="17" uuid="ce7f0e89-8d4c-4749-beae-4113cd5cfcd3">
+				<reportElement x="292" y="93" width="120" height="17" uuid="ce7f0e89-8d4c-4749-beae-4113cd5cfcd3">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -436,7 +436,7 @@
 				<text><![CDATA[รวมราคาสุทธิ]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="412" y="55" width="147" height="17" uuid="9208da6d-e73f-4568-af03-f87beb94be16">
+				<reportElement x="412" y="93" width="147" height="17" uuid="9208da6d-e73f-4568-af03-f87beb94be16">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -453,7 +453,7 @@
 				<textFieldExpression><![CDATA[$P{totalNetPrice}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="292" y="84" width="120" height="17" uuid="633867d9-727f-430b-8b0b-8b4a55a04cb2">
+				<reportElement x="292" y="57" width="120" height="17" uuid="633867d9-727f-430b-8b0b-8b4a55a04cb2">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -469,7 +469,7 @@
 				<text><![CDATA[ภาษีมูลค่าเพิ่ม 7%]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="412" y="84" width="147" height="17" uuid="14f2c6e2-b532-456e-a125-d836088a25d0">
+				<reportElement x="412" y="57" width="147" height="17" uuid="14f2c6e2-b532-456e-a125-d836088a25d0">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -486,7 +486,7 @@
 				<textFieldExpression><![CDATA[$P{vat}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="292" y="101" width="120" height="17" uuid="edef1b22-3a0f-4999-8420-590a0c4f8d52">
+				<reportElement x="292" y="75" width="120" height="17" uuid="edef1b22-3a0f-4999-8420-590a0c4f8d52">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -502,7 +502,7 @@
 				<text><![CDATA[ราคาไม่รวมภาษีมูลค่าเพิ่ม]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="412" y="101" width="147" height="17" uuid="7bc62448-a735-4889-926a-65b0acd32168">
+				<reportElement x="412" y="75" width="147" height="17" uuid="7bc62448-a735-4889-926a-65b0acd32168">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -519,7 +519,7 @@
 				<textFieldExpression><![CDATA[$P{notVat}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="292" y="38" width="120" height="17" uuid="706bbc30-b6e7-4d68-baf8-512a30f2c653">
+				<reportElement x="292" y="39" width="120" height="17" uuid="706bbc30-b6e7-4d68-baf8-512a30f2c653">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -535,7 +535,7 @@
 				<text><![CDATA[ค่าจัดส่ง]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="412" y="38" width="147" height="17" uuid="7f83b4dd-eadf-4e37-be18-91c53fbfd1d1">
+				<reportElement x="412" y="39" width="147" height="17" uuid="7f83b4dd-eadf-4e37-be18-91c53fbfd1d1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
