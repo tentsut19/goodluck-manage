@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://comvisitor.cvysc3moexiz.ap-southeast-1.rds.amazonaws.com/goodluck_db
+    username: root
+    password: comvisitor1234
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 180000
+  jpa:
+    hibernate.ddl-auto: none
+    hibernate.use-new-id-generator-mappings: false
+  jackson.time-zone: Asia/Bangkok
+
+server:
+  port: ${PORT:8092}
+
+storage-location: file:${user.home}/reports
+
+terms-of-service.path: /home/cabsat/pdf/terms-of-service/F-SA-013.pdf
+
+environment: uat
+
+logging:
+  file: 'docker-elk/logs/uat/cabsat.log'
+  pattern:
+    #    console: '%d{ISO8601} | %highlight(%-5level) | %t | %cyan(%class{0}) | %M | %L | %m%n'
+    #    file: '%d{ISO8601} | %highlight(%-5level) | %t | %cyan(%class{0}) | %M | %L | %m%n'
+    console: '%d{yyyy-MM-dd HH:mm:ss} | [%thread] | %highlight(%-5level) | %cyan(%class{0}) | %boldMagenta(%X{X-B3-TraceId}) | %green(%X{UserId}) | %M | %L | - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} | [%thread] | %-5level | %class{0} | %X{X-B3-TraceId} | %X{UserId} | %M | %L | - %msg%n'

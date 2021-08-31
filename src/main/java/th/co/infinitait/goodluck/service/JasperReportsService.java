@@ -53,15 +53,18 @@ public class JasperReportsService {
 		try (ByteArrayOutputStream byteArray = new ByteArrayOutputStream()) {
 			// Check if a compiled report exists
 			if (storageService.jasperFileExists(jasperFileName)) {
+				log.info("Check if a compiled report exists");
 				jasperReport = (JasperReport) JRLoader.loadObject(storageService.loadJasperFile(jasperFileName));
 			}
 			// Compile report from source and save
 			else {
+				log.info("Compile report from source and save");
 				String jrxml = storageService.loadJrxmlFile(jasperFileName);
 				jasperReport = JasperCompileManager.compileReport(jrxml);
 				// Save compiled report. Compiled report is loaded next time
 				JRSaver.saveObject(jasperReport, storageService.loadJasperFile(jasperFileName));
 			}
+			log.info("JasperFillManager.fillReport");
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource());
 			String exportPath = pdfFilePath + "/" + fileName +".pdf";
 			log.info("exportPath : {}",exportPath);
@@ -70,6 +73,7 @@ public class JasperReportsService {
 
 			return exportPath;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new InvalidParameterException(e.getMessage());
 		}
 	}
@@ -165,6 +169,8 @@ public class JasperReportsService {
 
 				params.put("vat", df.format(vat) + " บาท");
 				params.put("notVat", df.format(notVat) + " บาท");
+
+				params.put("pathLogo", "images/logo.png");
 
 				generateReportPdf(jasperFileName, fileName, params);
 
