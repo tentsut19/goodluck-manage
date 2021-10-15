@@ -20,7 +20,7 @@
 		<java.version>1.8</java.version>
 		<maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
 		<mariadb.version>2.5.1</mariadb.version>
-		<jasperreports.version>6.12.2</jasperreports.version>
+		<jasperreports.version>6.17.0</jasperreports.version>
 		<commons-lang3.version>3.7</commons-lang3.version>
 		<commons-io.version>2.6</commons-io.version>
 	</properties>
