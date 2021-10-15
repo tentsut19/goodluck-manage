@@ -141,4 +141,56 @@ public class ExcelService {
         return orderResponseList;
     }
 
+    public List<OrderResponse> uploadFileUpdateCancel(MultipartFile file, String sheetName) throws IOException {
+        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(), sheetName);
+        log.info("orderRequestList : {}", orderRequestList.size());
+        return updateCancel(orderRequestList);
+    }
+
+
+    public List<OrderResponse> updateCancel(List<OrderRequest> orderRequestList){
+        List<OrderResponse> orderResponseList = new ArrayList<>();
+        log.info("cabsatPayload : {}",cabsatPayload.getUserId());
+        if(StringUtils.isEmpty(cabsatPayload.getUserId())){
+            throw new RuntimeException("cabsatPayload null");
+        }
+        if(!CollectionUtils.isEmpty(orderRequestList)){
+            for(OrderRequest orderRequest : orderRequestList){
+                try {
+                    Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode());
+                    if(optional.isPresent()){
+                        OrderEntity orderEntity = optional.get();
+                        orderEntity.setStatus("Cancel");
+                        orderEntity.setUpdatedBy(cabsatPayload.getUserId());
+                        orderEntity.setUpdatedAt(new Date());
+                        orderRepository.save(orderEntity);
+
+                        OrderResponse orderResponse = new OrderResponse();
+                        orderResponse.setStatus("success");
+                        orderResponse.setTotalAmount(orderEntity.getTotalAmount());
+                        orderResponse.setParcelCode(orderRequest.getParcelCode());
+                        orderResponse.setRecipientName(orderRequest.getRecipientName());
+                        orderResponseList.add(orderResponse);
+                    }else{
+                        OrderResponse orderResponse = new OrderResponse();
+                        orderResponse.setStatus("fail");
+                        orderResponse.setErrorMessage("ไม่มีรหัสพัสดุนี้ในระบบ");
+                        orderResponse.setParcelCode(orderRequest.getParcelCode());
+                        orderResponse.setRecipientName(orderRequest.getRecipientName());
+                        orderResponseList.add(orderResponse);
+                    }
+                }catch (Exception e){
+                    OrderResponse orderResponse = new OrderResponse();
+                    orderResponse.setStatus("fail");
+                    orderResponse.setErrorMessage(e.getMessage());
+                    orderResponse.setParcelCode(orderRequest.getParcelCode());
+                    orderResponse.setRecipientName(orderRequest.getRecipientName());
+                    orderResponseList.add(orderResponse);
+                }
+            }
+        }
+        log.info("fail size : {}", orderResponseList.size());
+        return orderResponseList;
+    }
+
 }

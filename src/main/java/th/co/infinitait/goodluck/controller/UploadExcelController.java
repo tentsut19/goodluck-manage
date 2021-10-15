@@ -54,4 +54,19 @@ public class UploadExcelController {
         throw new NotFoundException(message);
     }
 
+    @PostMapping(value = "/excel/upload/update/cancel")
+    public ResponseEntity<List<OrderResponse>> uploadFileUpdateCancel(@RequestParam("file") MultipartFile file,
+                                                                       @RequestParam("sheet_name") String sheetName) {
+        String message = "";
+        if (excelHelperService.hasExcelFormat(file)) {
+            try {
+                return ResponseEntity.ok(fileService.uploadFileUpdateSuccess(file,sheetName));
+            } catch (Exception e) {
+                log.error(e.getMessage(),e);
+                throw new NotFoundException(e.getMessage());
+            }
+        }
+        message = "Please upload an excel file!";
+        throw new NotFoundException(message);
+    }
 }
