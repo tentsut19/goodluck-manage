@@ -2,13 +2,17 @@ package th.co.infinitait.goodluck.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import th.co.infinitait.goodluck.component.CabsatPayload;
 import th.co.infinitait.goodluck.exception.NotFoundException;
+import th.co.infinitait.goodluck.model.request.OrderRequest;
 import th.co.infinitait.goodluck.model.response.OrderResponse;
 import th.co.infinitait.goodluck.service.ExcelHelperService;
 import th.co.infinitait.goodluck.service.ExcelService;
+import th.co.infinitait.goodluck.service.UpdateOrderService;
 
 import java.util.List;
 
@@ -20,14 +24,30 @@ import java.util.List;
 public class UploadExcelController {
 
     private final ExcelService fileService;
+    private final UpdateOrderService updateOrderService;
+    private final CabsatPayload cabsatPayload;
     private final ExcelHelperService excelHelperService;
 
+    @GetMapping(value = "/update-order/state/{state}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<OrderResponse>> getUpdateOrder(@PathVariable String state) throws Exception {
+        log.info("getUpdateOrder : {}", state);
+        return ResponseEntity.ok(updateOrderService.getUpdateOrder(state));
+    }
+
+    @DeleteMapping(value = "/update-order/state/{state}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<OrderResponse> deleteUpdateOrder(@PathVariable String state) throws Exception {
+        log.info("deleteUpdateOrder : {}", state);
+        updateOrderService.deleteUpdateOrder(state);
+        return ResponseEntity.ok(OrderResponse.builder().build());
+    }
+
     @PostMapping(value = "/excel/upload/update/parcel-code")
-    public ResponseEntity<List<OrderResponse>> uploadFileUpdateParcelCode(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<OrderResponse> uploadFileUpdateParcelCode(@RequestParam("file") MultipartFile file) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                return ResponseEntity.ok(fileService.uploadFileUpdateParcelCode(file));
+                fileService.uploadFileUpdateParcelCode(file,cabsatPayload.getUserId());
+                return ResponseEntity.ok(OrderResponse.builder().build());
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 throw new NotFoundException(e.getMessage());
@@ -38,11 +58,12 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/success")
-    public ResponseEntity<List<OrderResponse>> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<OrderResponse> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                return ResponseEntity.ok(fileService.uploadFileUpdateSuccess(file));
+                fileService.uploadFileUpdateSuccess(file,cabsatPayload.getUserId());
+                return ResponseEntity.ok(OrderResponse.builder().build());
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 throw new NotFoundException(e.getMessage());
@@ -53,11 +74,12 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/cancel")
-    public ResponseEntity<List<OrderResponse>> uploadFileUpdateCancel(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<OrderResponse> uploadFileUpdateCancel(@RequestParam("file") MultipartFile file) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                return ResponseEntity.ok(fileService.uploadFileUpdateCancel(file));
+                fileService.uploadFileUpdateCancel(file,cabsatPayload.getUserId());
+                return ResponseEntity.ok(OrderResponse.builder().build());
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 throw new NotFoundException(e.getMessage());

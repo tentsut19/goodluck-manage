@@ -13,6 +13,7 @@ import java.util.Date;
 public class OrderResponse {
     private Long id;
     private String status;
+    private String state;
     private String errorMessage;
     private String parcelCode;
     private String recipientName;

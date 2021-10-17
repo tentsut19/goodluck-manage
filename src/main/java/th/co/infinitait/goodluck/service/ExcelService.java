@@ -26,22 +26,19 @@ public class ExcelService {
 
     private final ExcelHelperService excelHelperService;
     private final OrderRepository orderRepository;
-    private final CabsatPayload cabsatPayload;
+    private final UpdateOrderRepository updateOrderRepository;
 
     @Async
-    public List<OrderResponse> uploadFileUpdateParcelCode(MultipartFile file) throws Exception {
+    public void uploadFileUpdateParcelCode(MultipartFile file, String userId) throws Exception {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
-        return updateParcelCode(orderRequestList);
+        updateParcelCode(orderRequestList,userId);
     }
 
-    public List<OrderResponse> updateParcelCode(List<OrderRequest> orderRequestList){
-        List<OrderResponse> orderResponseList = new ArrayList<>();
-        log.info("cabsatPayload : {}",cabsatPayload.getUserId());
-        if(StringUtils.isEmpty(cabsatPayload.getUserId())){
-            throw new RuntimeException("cabsatPayload null");
-        }
+    public void updateParcelCode(List<OrderRequest> orderRequestList, String userId){
+        List<UpdateOrderEntity> updateOrderEntityList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(orderRequestList)){
+            updateOrderRepository.deleteByState("Shipping");
             for(OrderRequest orderRequest : orderRequestList){
                 try {
                     Optional<OrderEntity> optional = orderRepository.findByRecipientName(orderRequest.getRecipientName().trim());
@@ -51,150 +48,174 @@ public class ExcelService {
                                 orderEntity.getStatus().equalsIgnoreCase("Shipping")){
                             orderEntity.setParcelCode(orderRequest.getParcelCode());
                             orderEntity.setStatus("Shipping");
-                            orderEntity.setUpdatedBy(cabsatPayload.getUserId());
+                            orderEntity.setUpdatedBy(userId);
                             orderEntity.setUpdatedAt(new Date());
                             orderEntity.setDeliveryDate(new Date());
                             orderRepository.save(orderEntity);
 
-                            OrderResponse orderResponse = new OrderResponse();
-                            orderResponse.setStatus("success");
-                            orderResponse.setTotalAmount(orderEntity.getTotalAmount());
-                            orderResponse.setParcelCode(orderRequest.getParcelCode());
-                            orderResponse.setRecipientName(orderRequest.getRecipientName());
-                            orderResponseList.add(orderResponse);
+                            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                            updateOrder.setStatus("success");
+                            updateOrder.setState("Shipping");
+                            updateOrder.setTotalAmount(orderEntity.getTotalAmount());
+                            updateOrder.setParcelCode(orderRequest.getParcelCode());
+                            updateOrder.setRecipientName(orderRequest.getRecipientName());
+                            updateOrder.setCreatedBy(userId);
+                            updateOrder.setCreatedAt(new Date());
+                            updateOrderEntityList.add(updateOrder);
                         }else{
-                            OrderResponse orderResponse = new OrderResponse();
-                            orderResponse.setStatus("fail");
-                            orderResponse.setErrorMessage("รายการสินค้าของชื่อผู้รับนี้ไม่อยํ่ในสถานะแบบร่างหรือกำลังจัดส่ง");
-                            orderResponse.setParcelCode(orderRequest.getParcelCode());
-                            orderResponse.setRecipientName(orderRequest.getRecipientName());
-                            orderResponseList.add(orderResponse);
+                            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                            updateOrder.setStatus("fail");
+                            updateOrder.setState("Shipping");
+                            updateOrder.setErrorMessage("รายการสินค้าของชื่อผู้รับนี้ไม่อยํ่ในสถานะแบบร่างหรือกำลังจัดส่ง");
+                            updateOrder.setParcelCode(orderRequest.getParcelCode());
+                            updateOrder.setRecipientName(orderRequest.getRecipientName());
+                            updateOrder.setCreatedBy(userId);
+                            updateOrder.setCreatedAt(new Date());
+                            updateOrderEntityList.add(updateOrder);
                         }
                     }else{
-                        OrderResponse orderResponse = new OrderResponse();
-                        orderResponse.setStatus("fail");
-                        orderResponse.setErrorMessage("ไม่มีชื่อผู้รับในระบบ");
-                        orderResponse.setParcelCode(orderRequest.getParcelCode());
-                        orderResponse.setRecipientName(orderRequest.getRecipientName());
-                        orderResponseList.add(orderResponse);
+                        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                        updateOrder.setStatus("fail");
+                        updateOrder.setState("Shipping");
+                        updateOrder.setErrorMessage("ไม่มีชื่อผู้รับในระบบ");
+                        updateOrder.setParcelCode(orderRequest.getParcelCode());
+                        updateOrder.setRecipientName(orderRequest.getRecipientName());
+                        updateOrder.setCreatedBy(userId);
+                        updateOrder.setCreatedAt(new Date());
+                        updateOrderEntityList.add(updateOrder);
                     }
                 }catch (Exception e){
-                    OrderResponse orderResponse = new OrderResponse();
-                    orderResponse.setStatus("fail");
-                    orderResponse.setErrorMessage(e.getMessage());
-                    orderResponse.setParcelCode(orderRequest.getParcelCode());
-                    orderResponse.setRecipientName(orderRequest.getRecipientName());
-                    orderResponseList.add(orderResponse);
+                    UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                    updateOrder.setStatus("fail");
+                    updateOrder.setState("Shipping");
+                    updateOrder.setErrorMessage(e.getMessage());
+                    updateOrder.setParcelCode(orderRequest.getParcelCode());
+                    updateOrder.setRecipientName(orderRequest.getRecipientName());
+                    updateOrder.setCreatedBy(userId);
+                    updateOrder.setCreatedAt(new Date());
+                    updateOrderEntityList.add(updateOrder);
                 }
             }
         }
-        log.info("fail size : {}", orderResponseList.size());
-        return orderResponseList;
+        log.info("fail size : {}", updateOrderEntityList.size());
+        updateOrderRepository.saveAll(updateOrderEntityList);
     }
 
     @Async
-    public List<OrderResponse> uploadFileUpdateSuccess(MultipartFile file) throws IOException {
+    public void uploadFileUpdateSuccess(MultipartFile file, String userId) throws IOException {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
-        return updateSuccess(orderRequestList);
+        updateSuccess(orderRequestList,userId);
     }
 
-    public List<OrderResponse> updateSuccess(List<OrderRequest> orderRequestList){
-        List<OrderResponse> orderResponseList = new ArrayList<>();
-        log.info("cabsatPayload : {}",cabsatPayload.getUserId());
-        if(StringUtils.isEmpty(cabsatPayload.getUserId())){
-            throw new RuntimeException("cabsatPayload null");
-        }
+    public void updateSuccess(List<OrderRequest> orderRequestList, String userId){
+        List<UpdateOrderEntity> updateOrderEntityList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(orderRequestList)){
+            updateOrderRepository.deleteByState("Success");
             for(OrderRequest orderRequest : orderRequestList){
                 try {
                     Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode().trim());
                     if(optional.isPresent()){
                         OrderEntity orderEntity = optional.get();
                         orderEntity.setStatus("Success");
-                        orderEntity.setUpdatedBy(cabsatPayload.getUserId());
+                        orderEntity.setUpdatedBy(userId);
                         orderEntity.setUpdatedAt(new Date());
                         orderEntity.setDepositDate(new Date());
                         orderRepository.save(orderEntity);
 
-                        OrderResponse orderResponse = new OrderResponse();
-                        orderResponse.setStatus("success");
-                        orderResponse.setTotalAmount(orderEntity.getTotalAmount());
-                        orderResponse.setParcelCode(orderRequest.getParcelCode());
-                        orderResponse.setRecipientName(orderRequest.getRecipientName());
-                        orderResponseList.add(orderResponse);
+                        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                        updateOrder.setStatus("success");
+                        updateOrder.setState("Success");
+                        updateOrder.setTotalAmount(orderEntity.getTotalAmount());
+                        updateOrder.setParcelCode(orderRequest.getParcelCode());
+                        updateOrder.setRecipientName(orderRequest.getRecipientName());
+                        updateOrder.setCreatedBy(userId);
+                        updateOrder.setCreatedAt(new Date());
+                        updateOrderEntityList.add(updateOrder);
                     }else{
-                        OrderResponse orderResponse = new OrderResponse();
-                        orderResponse.setStatus("fail");
-                        orderResponse.setErrorMessage("ไม่มีรหัสพัสดุนี้ในระบบ");
-                        orderResponse.setParcelCode(orderRequest.getParcelCode());
-                        orderResponse.setRecipientName(orderRequest.getRecipientName());
-                        orderResponseList.add(orderResponse);
+                        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                        updateOrder.setStatus("fail");
+                        updateOrder.setState("Success");
+                        updateOrder.setErrorMessage("ไม่มีรหัสพัสดุนี้ในระบบ");
+                        updateOrder.setParcelCode(orderRequest.getParcelCode());
+                        updateOrder.setRecipientName(orderRequest.getRecipientName());
+                        updateOrder.setCreatedBy(userId);
+                        updateOrder.setCreatedAt(new Date());
+                        updateOrderEntityList.add(updateOrder);
                     }
                 }catch (Exception e){
-                    OrderResponse orderResponse = new OrderResponse();
-                    orderResponse.setStatus("fail");
-                    orderResponse.setErrorMessage(e.getMessage());
-                    orderResponse.setParcelCode(orderRequest.getParcelCode());
-                    orderResponse.setRecipientName(orderRequest.getRecipientName());
-                    orderResponseList.add(orderResponse);
+                    UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                    updateOrder.setStatus("fail");
+                    updateOrder.setState("Success");
+                    updateOrder.setErrorMessage(e.getMessage());
+                    updateOrder.setParcelCode(orderRequest.getParcelCode());
+                    updateOrder.setRecipientName(orderRequest.getRecipientName());
+                    updateOrder.setCreatedBy(userId);
+                    updateOrder.setCreatedAt(new Date());
+                    updateOrderEntityList.add(updateOrder);
                 }
             }
         }
-        log.info("fail size : {}", orderResponseList.size());
-        return orderResponseList;
+        log.info("fail size : {}", updateOrderEntityList.size());
+        updateOrderRepository.saveAll(updateOrderEntityList);
     }
 
     @Async
-    public List<OrderResponse> uploadFileUpdateCancel(MultipartFile file) throws IOException {
+    public void uploadFileUpdateCancel(MultipartFile file, String userId) throws IOException {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
-        return updateCancel(orderRequestList);
+        updateCancel(orderRequestList,userId);
     }
 
-    public List<OrderResponse> updateCancel(List<OrderRequest> orderRequestList){
-        List<OrderResponse> orderResponseList = new ArrayList<>();
-        log.info("cabsatPayload : {}",cabsatPayload.getUserId());
-        if(StringUtils.isEmpty(cabsatPayload.getUserId())){
-            throw new RuntimeException("cabsatPayload null");
-        }
+    public void updateCancel(List<OrderRequest> orderRequestList, String userId){
+        List<UpdateOrderEntity> updateOrderEntityList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(orderRequestList)){
+            updateOrderRepository.deleteByState("Cancel");
             for(OrderRequest orderRequest : orderRequestList){
                 try {
                     Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode().trim());
                     if(optional.isPresent()){
                         OrderEntity orderEntity = optional.get();
                         orderEntity.setStatus("Cancel");
-                        orderEntity.setUpdatedBy(cabsatPayload.getUserId());
+                        orderEntity.setUpdatedBy(userId);
                         orderEntity.setUpdatedAt(new Date());
                         orderRepository.save(orderEntity);
 
-                        OrderResponse orderResponse = new OrderResponse();
-                        orderResponse.setStatus("success");
-                        orderResponse.setTotalAmount(orderEntity.getTotalAmount());
-                        orderResponse.setParcelCode(orderRequest.getParcelCode());
-                        orderResponse.setRecipientName(orderRequest.getRecipientName());
-                        orderResponseList.add(orderResponse);
+                        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                        updateOrder.setStatus("success");
+                        updateOrder.setState("Cancel");
+                        updateOrder.setTotalAmount(orderEntity.getTotalAmount());
+                        updateOrder.setParcelCode(orderRequest.getParcelCode());
+                        updateOrder.setRecipientName(orderRequest.getRecipientName());
+                        updateOrder.setCreatedBy(userId);
+                        updateOrder.setCreatedAt(new Date());
+                        updateOrderEntityList.add(updateOrder);
                     }else{
-                        OrderResponse orderResponse = new OrderResponse();
-                        orderResponse.setStatus("fail");
-                        orderResponse.setErrorMessage("ไม่มีรหัสพัสดุนี้ในระบบ");
-                        orderResponse.setParcelCode(orderRequest.getParcelCode());
-                        orderResponse.setRecipientName(orderRequest.getRecipientName());
-                        orderResponseList.add(orderResponse);
+                        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                        updateOrder.setStatus("fail");
+                        updateOrder.setState("Cancel");
+                        updateOrder.setErrorMessage("ไม่มีรหัสพัสดุนี้ในระบบ");
+                        updateOrder.setParcelCode(orderRequest.getParcelCode());
+                        updateOrder.setRecipientName(orderRequest.getRecipientName());
+                        updateOrder.setCreatedBy(userId);
+                        updateOrder.setCreatedAt(new Date());
+                        updateOrderEntityList.add(updateOrder);
                     }
                 }catch (Exception e){
-                    OrderResponse orderResponse = new OrderResponse();
-                    orderResponse.setStatus("fail");
-                    orderResponse.setErrorMessage(e.getMessage());
-                    orderResponse.setParcelCode(orderRequest.getParcelCode());
-                    orderResponse.setRecipientName(orderRequest.getRecipientName());
-                    orderResponseList.add(orderResponse);
+                    UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                    updateOrder.setStatus("fail");
+                    updateOrder.setState("Cancel");
+                    updateOrder.setErrorMessage(e.getMessage());
+                    updateOrder.setParcelCode(orderRequest.getParcelCode());
+                    updateOrder.setRecipientName(orderRequest.getRecipientName());
+                    updateOrder.setCreatedBy(userId);
+                    updateOrder.setCreatedAt(new Date());
+                    updateOrderEntityList.add(updateOrder);
                 }
             }
         }
-        log.info("fail size : {}", orderResponseList.size());
-        return orderResponseList;
+        log.info("fail size : {}", updateOrderEntityList.size());
+        updateOrderRepository.saveAll(updateOrderEntityList);
     }
 
 }
