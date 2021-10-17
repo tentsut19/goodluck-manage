@@ -28,13 +28,13 @@ public class ExcelService {
     private final OrderRepository orderRepository;
     private final CabsatPayload cabsatPayload;
 
+    @Async
     public List<OrderResponse> uploadFileUpdateParcelCode(MultipartFile file) throws Exception {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
         return updateParcelCode(orderRequestList);
     }
 
-    @Async
     public List<OrderResponse> updateParcelCode(List<OrderRequest> orderRequestList){
         List<OrderResponse> orderResponseList = new ArrayList<>();
         log.info("cabsatPayload : {}",cabsatPayload.getUserId());
@@ -92,13 +92,13 @@ public class ExcelService {
         return orderResponseList;
     }
 
+    @Async
     public List<OrderResponse> uploadFileUpdateSuccess(MultipartFile file) throws IOException {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
         return updateSuccess(orderRequestList);
     }
 
-    @Async
     public List<OrderResponse> updateSuccess(List<OrderRequest> orderRequestList){
         List<OrderResponse> orderResponseList = new ArrayList<>();
         log.info("cabsatPayload : {}",cabsatPayload.getUserId());
@@ -145,13 +145,13 @@ public class ExcelService {
         return orderResponseList;
     }
 
+    @Async
     public List<OrderResponse> uploadFileUpdateCancel(MultipartFile file) throws IOException {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
         return updateCancel(orderRequestList);
     }
 
-    @Async
     public List<OrderResponse> updateCancel(List<OrderRequest> orderRequestList){
         List<OrderResponse> orderResponseList = new ArrayList<>();
         log.info("cabsatPayload : {}",cabsatPayload.getUserId());
