@@ -73,6 +73,12 @@ public class OrderEntity {
     @Column(name = "UPDATED_BY")
     private String updatedBy;
 
+    @Column(name = "delivery_date")
+    private Date deliveryDate;
+
+    @Column(name = "deposit_date")
+    private Date depositDate;
+
     @ManyToOne
     @JoinColumn(name="company_id")
     private CompanyEntity company;

@@ -72,7 +72,7 @@ public class ExcelHelperService {
                     continue;
                 }
 
-                cr = new CellReference("G"); // ชื่อผู้รับ
+                cr = new CellReference("B"); // ชื่อผู้รับ
                 cell = currentRow.getCell(cr.getCol());
                 cellValue = evaluator.evaluate(cell);
                 String recipientName = getValueString(cellValue);

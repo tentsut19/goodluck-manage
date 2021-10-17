@@ -27,9 +27,8 @@ public class ExcelService {
     private final OrderRepository orderRepository;
     private final CabsatPayload cabsatPayload;
 
-    public List<OrderResponse> uploadFileUpdateParcelCode(MultipartFile file, String sheetName) throws Exception {
-//        String formattedDateRun = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(), sheetName);
+    public List<OrderResponse> uploadFileUpdateParcelCode(MultipartFile file) throws Exception {
+        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
         return updateParcelCode(orderRequestList);
     }
@@ -43,7 +42,7 @@ public class ExcelService {
         if(!CollectionUtils.isEmpty(orderRequestList)){
             for(OrderRequest orderRequest : orderRequestList){
                 try {
-                    Optional<OrderEntity> optional = orderRepository.findByRecipientName(orderRequest.getRecipientName());
+                    Optional<OrderEntity> optional = orderRepository.findByRecipientName(orderRequest.getRecipientName().trim());
                     if(optional.isPresent()){
                         OrderEntity orderEntity = optional.get();
                         if(orderEntity.getStatus().equalsIgnoreCase("Draft") ||
@@ -52,6 +51,7 @@ public class ExcelService {
                             orderEntity.setStatus("Shipping");
                             orderEntity.setUpdatedBy(cabsatPayload.getUserId());
                             orderEntity.setUpdatedAt(new Date());
+                            orderEntity.setDeliveryDate(new Date());
                             orderRepository.save(orderEntity);
 
                             OrderResponse orderResponse = new OrderResponse();
@@ -90,8 +90,8 @@ public class ExcelService {
         return orderResponseList;
     }
 
-    public List<OrderResponse> uploadFileUpdateSuccess(MultipartFile file, String sheetName) throws IOException {
-        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(), sheetName);
+    public List<OrderResponse> uploadFileUpdateSuccess(MultipartFile file) throws IOException {
+        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
         return updateSuccess(orderRequestList);
     }
@@ -105,12 +105,13 @@ public class ExcelService {
         if(!CollectionUtils.isEmpty(orderRequestList)){
             for(OrderRequest orderRequest : orderRequestList){
                 try {
-                    Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode());
+                    Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode().trim());
                     if(optional.isPresent()){
                         OrderEntity orderEntity = optional.get();
                         orderEntity.setStatus("Success");
                         orderEntity.setUpdatedBy(cabsatPayload.getUserId());
                         orderEntity.setUpdatedAt(new Date());
+                        orderEntity.setDepositDate(new Date());
                         orderRepository.save(orderEntity);
 
                         OrderResponse orderResponse = new OrderResponse();
@@ -141,8 +142,8 @@ public class ExcelService {
         return orderResponseList;
     }
 
-    public List<OrderResponse> uploadFileUpdateCancel(MultipartFile file, String sheetName) throws IOException {
-        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(), sheetName);
+    public List<OrderResponse> uploadFileUpdateCancel(MultipartFile file) throws IOException {
+        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),"order");
         log.info("orderRequestList : {}", orderRequestList.size());
         return updateCancel(orderRequestList);
     }
@@ -157,7 +158,7 @@ public class ExcelService {
         if(!CollectionUtils.isEmpty(orderRequestList)){
             for(OrderRequest orderRequest : orderRequestList){
                 try {
-                    Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode());
+                    Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode().trim());
                     if(optional.isPresent()){
                         OrderEntity orderEntity = optional.get();
                         orderEntity.setStatus("Cancel");

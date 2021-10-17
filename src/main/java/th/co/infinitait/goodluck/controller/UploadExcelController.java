@@ -23,12 +23,11 @@ public class UploadExcelController {
     private final ExcelHelperService excelHelperService;
 
     @PostMapping(value = "/excel/upload/update/parcel-code")
-    public ResponseEntity<List<OrderResponse>> uploadFileUpdateParcelCode(@RequestParam("file") MultipartFile file,
-                                                                          @RequestParam("sheet_name") String sheetName) {
+    public ResponseEntity<List<OrderResponse>> uploadFileUpdateParcelCode(@RequestParam("file") MultipartFile file) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                return ResponseEntity.ok(fileService.uploadFileUpdateParcelCode(file,sheetName));
+                return ResponseEntity.ok(fileService.uploadFileUpdateParcelCode(file));
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 throw new NotFoundException(e.getMessage());
@@ -39,12 +38,11 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/success")
-    public ResponseEntity<List<OrderResponse>> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file,
-                                                                          @RequestParam("sheet_name") String sheetName) {
+    public ResponseEntity<List<OrderResponse>> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                return ResponseEntity.ok(fileService.uploadFileUpdateSuccess(file,sheetName));
+                return ResponseEntity.ok(fileService.uploadFileUpdateSuccess(file));
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 throw new NotFoundException(e.getMessage());
@@ -55,12 +53,11 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/cancel")
-    public ResponseEntity<List<OrderResponse>> uploadFileUpdateCancel(@RequestParam("file") MultipartFile file,
-                                                                       @RequestParam("sheet_name") String sheetName) {
+    public ResponseEntity<List<OrderResponse>> uploadFileUpdateCancel(@RequestParam("file") MultipartFile file) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                return ResponseEntity.ok(fileService.uploadFileUpdateSuccess(file,sheetName));
+                return ResponseEntity.ok(fileService.uploadFileUpdateCancel(file));
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 throw new NotFoundException(e.getMessage());
