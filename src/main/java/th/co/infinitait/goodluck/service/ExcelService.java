@@ -2,6 +2,7 @@ package th.co.infinitait.goodluck.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -33,6 +34,7 @@ public class ExcelService {
         return updateParcelCode(orderRequestList);
     }
 
+    @Async
     public List<OrderResponse> updateParcelCode(List<OrderRequest> orderRequestList){
         List<OrderResponse> orderResponseList = new ArrayList<>();
         log.info("cabsatPayload : {}",cabsatPayload.getUserId());
@@ -96,6 +98,7 @@ public class ExcelService {
         return updateSuccess(orderRequestList);
     }
 
+    @Async
     public List<OrderResponse> updateSuccess(List<OrderRequest> orderRequestList){
         List<OrderResponse> orderResponseList = new ArrayList<>();
         log.info("cabsatPayload : {}",cabsatPayload.getUserId());
@@ -148,7 +151,7 @@ public class ExcelService {
         return updateCancel(orderRequestList);
     }
 
-
+    @Async
     public List<OrderResponse> updateCancel(List<OrderRequest> orderRequestList){
         List<OrderResponse> orderResponseList = new ArrayList<>();
         log.info("cabsatPayload : {}",cabsatPayload.getUserId());
