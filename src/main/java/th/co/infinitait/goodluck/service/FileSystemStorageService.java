@@ -86,7 +86,9 @@ public class FileSystemStorageService {
 
 	public boolean jasperFileExists(String file) {
 		Path reportFile = rootLocation;
+		log.info("reportFile1 : {}",reportFile);
 		reportFile = reportFile.resolve(file + ".jasper");
+		log.info("reportFile2 : {}",reportFile);
 		if (Files.exists(reportFile))
 			return true;
 		return false;
