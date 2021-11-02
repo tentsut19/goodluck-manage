@@ -37,7 +37,8 @@ public class ReportController {
 
     @GetMapping(value = "/receipt", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<byte[]> downloadOrderReceiptReport() throws Exception {
-        String exportPath = pdfFilePath + "/order_receipt.pdf";
+//        String exportPath = pdfFilePath + "/order_receipt.pdf";
+        String exportPath = "order_receipt.pdf";
         log.info("downloadCustomerServiceCallReport exportPath : {}", exportPath);
         File file = new File(exportPath);
         byte[] fileContent = FileUtils.readFileToByteArray(file);
