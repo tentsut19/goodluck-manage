@@ -60,9 +60,12 @@ public class JasperReportsService {
 			else {
 				log.info("Compile report from source and save");
 				String jrxml = storageService.loadJrxmlFile(jasperFileName);
+				log.info("jrxml : {}",jrxml);
 				jasperReport = JasperCompileManager.compileReport(jrxml);
+				log.info("=== JasperCompileManager ===");
 				// Save compiled report. Compiled report is loaded next time
 				JRSaver.saveObject(jasperReport, storageService.loadJasperFile(jasperFileName));
+				log.info("=== JRSaver saveObject ===");
 			}
 			log.info("JasperFillManager.fillReport");
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource());
