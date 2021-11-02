@@ -95,8 +95,13 @@ public class FileSystemStorageService {
 	public String loadJrxmlFile(String file) {
 		// @formatter:off
 		try {
+			log.info("loadJrxmlFile : {}",file);
+			log.info("getReportLocation : {}",properties.getReportLocation());
+			log.info("getReportLocation getURI : {}",properties.getReportLocation().getURI());
 			Path reportFile = Paths.get(properties.getReportLocation().getURI());
+			log.info("reportFile : {}",reportFile);
 			reportFile = reportFile.resolve(file + ".jrxml");
+			log.info("reportFile.toString() : {}",reportFile.toString());
 			return reportFile.toString();
 		} catch (IOException e) {
 			log.error("Error while trying to get file prefix", e);
