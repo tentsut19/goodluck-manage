@@ -192,7 +192,7 @@ public class JasperReportsService {
 				generateReportPdf(jasperFileName, fileName, params);
 
 //				String exportPath = pdfFilePath + "/order_receipt_"+i+".pdf";
-				String exportPath = "/order_receipt_"+i+".pdf";
+				String exportPath = "order_receipt_"+i+".pdf";
 				log.info("downloadCustomerServiceCallReport exportPath1 : {}", exportPath);
 				File file = new File(exportPath);
 				ut.addSource(file);
@@ -200,7 +200,7 @@ public class JasperReportsService {
 				i++;
 			}
 //			ut.setDestinationFileName(pdfFilePath + "/order_receipt.pdf");
-			ut.setDestinationFileName("/order_receipt.pdf");
+			ut.setDestinationFileName("order_receipt.pdf");
 			ut.mergeDocuments();
 		}
 
