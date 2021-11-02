@@ -76,7 +76,8 @@ public class JasperReportsService {
 			}
 			log.info("JasperFillManager.fillReport");
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource());
-			String exportPath = pdfFilePath + "/" + fileName +".pdf";
+//			String exportPath = pdfFilePath + "/" + fileName +".pdf";
+			String exportPath = fileName +".pdf";
 			log.info("exportPath : {}",exportPath);
 			// return the PDF in bytes
 			JasperExportManager.exportReportToPdfFile(jasperPrint,exportPath);
