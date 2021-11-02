@@ -44,11 +44,13 @@ public class FileSystemStorageService {
 
 	public FileSystemStorageService(Properties properties) throws IOException {
 		this.properties = properties;
-		if(System.getProperty("os.name").contains("indow")){
-			this.rootLocation = Paths.get(properties.getStorageLocation().getURL().getPath().substring(1,properties.getStorageLocation().getURL().getPath().length()));
-		}else{
-			this.rootLocation = Paths.get(properties.getStorageLocation().getURL().getPath());
-		}
+//		if(System.getProperty("os.name").contains("indow")){
+//			this.rootLocation = Paths.get(properties.getStorageLocation().getURL().getPath().substring(1,properties.getStorageLocation().getURL().getPath().length()));
+//		}else{
+//			this.rootLocation = Paths.get(properties.getStorageLocation().getURL().getPath());
+//		}
+		this.rootLocation = Paths.get("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/");
+		// https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/receipt.jrxml
 	}
 
 	public void init() {
