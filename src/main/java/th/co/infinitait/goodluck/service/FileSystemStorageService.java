@@ -16,24 +16,16 @@
 package th.co.infinitait.goodluck.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 import th.co.infinitait.goodluck.config.Properties;
 import th.co.infinitait.goodluck.exception.StorageException;
 import th.co.infinitait.goodluck.exception.StorageFileNotFoundException;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 
 @Slf4j
 @Service
@@ -49,7 +41,7 @@ public class FileSystemStorageService {
 //		}else{
 //			this.rootLocation = Paths.get(properties.getStorageLocation().getURL().getPath());
 //		}
-		this.rootLocation = Paths.get("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/");
+		this.rootLocation = Paths.get("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/receipt.jrxml");
 		// https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/receipt.jrxml
 	}
 
@@ -106,6 +98,7 @@ public class FileSystemStorageService {
 			log.info("getReportLocation : {}",properties.getReportLocation());
 			log.info("getReportLocation getURI : {}",properties.getReportLocation().getURI());
 			Path reportFile = Paths.get(properties.getReportLocation().getURI());
+//			Path reportFile = Paths.get("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/");
 			log.info("reportFile : {}",reportFile);
 			reportFile = reportFile.resolve(file + ".jrxml");
 			log.info("reportFile.toString() : {}",reportFile.toString());
@@ -122,6 +115,7 @@ public class FileSystemStorageService {
 		try {
 			Path reportFile = Paths.get(properties.getReportLocation().getURI());
 			reportFile = reportFile.resolve(file + ".jasper");
+			log.info("reportFile : {}",reportFile.toFile());
 			return reportFile.toFile();
 		} catch (IOException e) {
 			log.error("Error while trying to get file prefix", e);

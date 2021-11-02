@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSaver;
+import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -54,17 +56,22 @@ public class JasperReportsService {
 			// Check if a compiled report exists
 			if (storageService.jasperFileExists(jasperFileName)) {
 				log.info("Check if a compiled report exists");
+//				jasperReport = (JasperReport) JRLoader.loadObject(storageService.loadJasperFile(jasperFileName));
 				jasperReport = (JasperReport) JRLoader.loadObject(storageService.loadJasperFile(jasperFileName));
 			}
 			// Compile report from source and save
 			else {
 				log.info("Compile report from source and save");
-				String jrxml = storageService.loadJrxmlFile(jasperFileName);
+				URL url = new URL("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/receipt.jrxml");
+				FileUtils.copyURLToFile(url, new File("receipt.jrxml"));
+//				String jrxml = storageService.loadJrxmlFile(jasperFileName);
+				String jrxml = "receipt.jrxml";
 				log.info("jrxml : {}",jrxml);
 				jasperReport = JasperCompileManager.compileReport(jrxml);
 				log.info("=== JasperCompileManager ===");
 				// Save compiled report. Compiled report is loaded next time
-				JRSaver.saveObject(jasperReport, storageService.loadJasperFile(jasperFileName));
+//				JRSaver.saveObject(jasperReport, storageService.loadJasperFile(jasperFileName));
+				JRSaver.saveObject(jasperReport, new File("receipt.jasper"));
 				log.info("=== JRSaver saveObject ===");
 			}
 			log.info("JasperFillManager.fillReport");
