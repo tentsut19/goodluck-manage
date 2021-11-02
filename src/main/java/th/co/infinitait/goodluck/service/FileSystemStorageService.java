@@ -91,8 +91,11 @@ public class FileSystemStorageService {
 		log.info("reportFile1 : {}",reportFile);
 		reportFile = reportFile.resolve(file + ".jasper");
 		log.info("reportFile2 : {}",reportFile);
-		if (Files.exists(reportFile))
+		if (Files.exists(reportFile)){
+			log.info("=== Files.exists true ===");
 			return true;
+		}
+		log.info("=== Files.exists false ===");
 		return false;
 	}
 
