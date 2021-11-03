@@ -115,10 +115,12 @@ public class JasperReportsService {
 				if(!CollectionUtils.isEmpty(orderProductEntityList)) {
 					int no = 1;
 					for(OrderProductEntity orderProductEntity:orderProductEntityList) {
+						Integer quantity = orderProductEntity.getProductQuantity();
 						OrderDetailReport orderDetailReport = new OrderDetailReport();
 						orderDetailReport.setNo((no++)+"");
 						orderDetailReport.setDescription(orderProductEntity.getProductName());
-						orderDetailReport.setQuantity(orderProductEntity.getProductQuantity() + "");
+						orderDetailReport.setQuantity(""+quantity);
+
 						String unitPrice = "0.00";
 						String amount = "0.00";
 						List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
@@ -127,9 +129,9 @@ public class JasperReportsService {
 							BigDecimal productPrice = settingProductEntity.getPrice();
 							if (productPrice != null) {
 								unitPrice = df.format(productPrice);
-								amount = df.format(productPrice.multiply(new BigDecimal(orderProductEntity.getProductQuantity())));
+								amount = df.format(productPrice.multiply(new BigDecimal(quantity)));
+								allPrice = allPrice.add(productPrice.multiply(new BigDecimal(quantity)));
 							}
-							allPrice = allPrice.add(productPrice);
 						}
 						orderDetailReport.setUnitPrice(unitPrice);
 						orderDetailReport.setAmount(amount);
