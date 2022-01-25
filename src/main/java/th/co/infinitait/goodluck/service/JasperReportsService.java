@@ -116,7 +116,7 @@ public class JasperReportsService {
 				}
 				BigDecimal allPrice = BigDecimal.ZERO;
 				BigDecimal discountPrice = BigDecimal.ZERO;
-				BigDecimal shippingCostPrice = new BigDecimal("60");
+//				BigDecimal shippingCostPrice = new BigDecimal("60");
 				OrderEntity orderEntity = optional.get();
 				List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
 				if(!CollectionUtils.isEmpty(orderProductEntityList)) {
@@ -182,25 +182,17 @@ public class JasperReportsService {
 				params.put("customerAddress", "ที่อยู่ / Address : " + customerAddress);
 				params.put("date", "วันที่ / Date : "+dateOrder);
 
-				BigDecimal totalNetPrice = allPrice.add(shippingCostPrice);
+//				BigDecimal totalNetPrice = allPrice.add(shippingCostPrice);
+//				BigDecimal shippingCostPriceAdd = orderEntity.getTotalAmount().subtract(totalNetPrice);
+//				if(shippingCostPriceAdd.compareTo(BigDecimal.ZERO) > 0){
+//					shippingCostPrice = shippingCostPrice.add(shippingCostPriceAdd);
+//				}
 
-				BigDecimal shippingCostPriceAdd = orderEntity.getTotalAmount().subtract(totalNetPrice);
-				if(shippingCostPriceAdd.compareTo(BigDecimal.ZERO) > 0){
-					shippingCostPrice = shippingCostPrice.add(shippingCostPriceAdd);
-				}
-
-				BigDecimal amountDiff = orderEntity.getTotalAmount().subtract(allPrice);
-				if(shippingCostPriceAdd.compareTo(BigDecimal.ZERO) <= 0){
-					shippingCostPrice = BigDecimal.ZERO;
-					discountPrice = amountDiff;
-				}
-
-				params.put("all", df.format(allPrice) + " บาท");
-				params.put("discount", df.format(discountPrice) + " บาท");
-				params.put("shippingCost", df.format(shippingCostPrice) + " บาท");
-				params.put("totalNetPrice", df.format(orderEntity.getTotalAmount()) + " บาท");
-
-				params.put("totalNetPriceText", "("+new NumberFormat().getThaiBaht(orderEntity.getTotalAmount())+")");
+//				BigDecimal amountDiff = orderEntity.getTotalAmount().subtract(allPrice);
+//				if(shippingCostPriceAdd.compareTo(BigDecimal.ZERO) <= 0){
+//					shippingCostPrice = BigDecimal.ZERO;
+//					discountPrice = amountDiff;
+//				}
 
 				BigDecimal notVat = orderEntity.getTotalAmount().multiply(new BigDecimal("100"));
 				notVat = notVat.divide(new BigDecimal("107"), RoundingMode.HALF_UP);
@@ -209,6 +201,18 @@ public class JasperReportsService {
 
 				params.put("vat", df.format(vat) + " บาท");
 				params.put("notVat", df.format(notVat) + " บาท");
+
+				discountPrice = notVat.subtract(allPrice);
+				if(discountPrice.compareTo(BigDecimal.ZERO) <= 0){
+					discountPrice = discountPrice.multiply(new BigDecimal("-1"));
+				}
+
+				params.put("all", df.format(allPrice) + " บาท");
+				params.put("discount", df.format(discountPrice) + " บาท");
+//				params.put("shippingCost", df.format(shippingCostPrice) + " บาท");
+				params.put("totalNetPrice", df.format(orderEntity.getTotalAmount()) + " บาท");
+
+				params.put("totalNetPriceText", "("+new NumberFormat().getThaiBaht(orderEntity.getTotalAmount())+")");
 
 				params.put("pathLogo", "images/logo1.jpg");
 
