@@ -143,10 +143,15 @@ public class JasperReportsService {
 
 				params.put("receiptNo", "หมายเลขใบเสร็จรับเงิน : "+orderEntity.getCode().replace("OD","RC"));
 
-				params.put("receivedBy", "ผู้รับเงิน : บริษัท อินฟินิตี้ ริช88 มาร์เก็ตติ้ง ออนไลน์ จำกัด");
-				params.put("receivedTel", "ติดต่อ : 064 995 5553");
+//				params.put("receivedBy", "ผู้รับเงิน : บริษัท อินฟินิตี้ ริช88 มาร์เก็ตติ้ง ออนไลน์ จำกัด");
+//				params.put("receivedTel", "ติดต่อ : 064 995 5553");
+//				params.put("receivedAddress", "ที่อยู่ : 199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
+//				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0125564006363");
+
+				params.put("receivedBy", "ผู้รับเงิน : บริษัท นิลาริช จำกัด / NILARICH CO.,LTD");
+				params.put("receivedTel", "ติดต่อ : 0936532565");
 				params.put("receivedAddress", "ที่อยู่ : 199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
-				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0125564006363");
+				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0425562000683");
 
 				String customerName = "";
 				String customerTel = "";
@@ -189,7 +194,7 @@ public class JasperReportsService {
 				params.put("vat", df.format(vat) + " บาท");
 				params.put("notVat", df.format(notVat) + " บาท");
 
-				params.put("pathLogo", "images/logo.png");
+				params.put("pathLogo", "images/logo1.png");
 
 				generateReportPdf(jasperFileName, fileName, params);
 
