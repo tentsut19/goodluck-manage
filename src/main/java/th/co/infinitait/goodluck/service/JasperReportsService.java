@@ -69,7 +69,7 @@ public class JasperReportsService {
 				String jrxml = jasperFileName+".jrxml";
 				if(!environment.equalsIgnoreCase("prod")) {
 					URL url = new URL("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/receipt_v1.jrxml");
-					FileUtils.copyURLToFile(url, new File("receipt.jrxml"));
+					FileUtils.copyURLToFile(url, new File("receipt_v1.jrxml"));
 				}else{
 					jrxml = storageService.loadJrxmlFile(jasperFileName);
 				}
