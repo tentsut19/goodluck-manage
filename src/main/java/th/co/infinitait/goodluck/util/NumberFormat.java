@@ -53,8 +53,8 @@ public class NumberFormat {
         this.valueText = getThaiBaht(value);
         return this.valueText;
     }
- 
-    private static String getThaiBaht(BigDecimal amount) {
+
+    public String getThaiBaht(BigDecimal amount) {
         StringBuilder builder = new StringBuilder();
         BigDecimal absolute = amount.abs();
         int precision = absolute.precision();

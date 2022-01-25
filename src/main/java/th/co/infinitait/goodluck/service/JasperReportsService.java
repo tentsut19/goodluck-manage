@@ -20,6 +20,7 @@ import th.co.infinitait.goodluck.model.OrderDetailReport;
 import th.co.infinitait.goodluck.repository.OrderProductRepository;
 import th.co.infinitait.goodluck.repository.OrderRepository;
 import th.co.infinitait.goodluck.repository.SettingProductRepository;
+import th.co.infinitait.goodluck.util.NumberFormat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,6 +50,9 @@ public class JasperReportsService {
 	@Value("${report-generate-path}")
 	private String pdfFilePath;
 
+	@Value("${environment}")
+	private String environment;
+
 	public String generateReportPdf(String jasperFileName, String fileName, Map<String, Object> params) {
 		log.info("jasperFileName : {}",jasperFileName);
 		JasperReport jasperReport = null;
@@ -62,10 +66,13 @@ public class JasperReportsService {
 			// Compile report from source and save
 			else {
 				log.info("Compile report from source and save");
-				URL url = new URL("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/receipt.jrxml");
-				FileUtils.copyURLToFile(url, new File("receipt.jrxml"));
-//				String jrxml = storageService.loadJrxmlFile(jasperFileName);
-				String jrxml = "receipt.jrxml";
+				String jrxml = jasperFileName+".jrxml";
+				if(environment.equalsIgnoreCase("prod")) {
+					URL url = new URL("https://ecommerce-uat-bucket.s3.ap-southeast-1.amazonaws.com/api/reports/receipt_v1.jrxml");
+					FileUtils.copyURLToFile(url, new File("receipt.jrxml"));
+				}else{
+					jrxml = storageService.loadJrxmlFile(jasperFileName);
+				}
 				log.info("jrxml : {}",jrxml);
 				jasperReport = JasperCompileManager.compileReport(jrxml);
 				log.info("=== JasperCompileManager ===");
@@ -92,7 +99,7 @@ public class JasperReportsService {
 	public String createOrderReceiptReport(String jasperFileName, List<Long> orderIdList) throws IOException {
 		log.info("jasperFileName : {}, orderIdList : {}",jasperFileName, orderIdList);
 		SimpleDateFormat formatterDDMMYYYYHHmm = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("th", "TH"));
-		SimpleDateFormat formatterDDMMYYYY = new SimpleDateFormat("dd/MM/yyyy", new Locale("th", "TH"));
+		SimpleDateFormat formatterDDMMYYYY = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 		DecimalFormat df = new DecimalFormat( "#,##0.00" );
 		String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		Map<String, Object> params = new HashMap<>();
@@ -141,6 +148,8 @@ public class JasperReportsService {
 
 				params.put("orderDetailReportList", orderDetailReportList);
 
+				params.put("orderNo", "เลขที่ / No. : "+orderEntity.getCode());
+
 				params.put("receiptNo", "หมายเลขใบเสร็จรับเงิน : "+orderEntity.getCode().replace("OD","RC"));
 
 //				params.put("receivedBy", "ผู้รับเงิน : บริษัท อินฟินิตี้ ริช88 มาร์เก็ตติ้ง ออนไลน์ จำกัด");
@@ -148,9 +157,9 @@ public class JasperReportsService {
 //				params.put("receivedAddress", "ที่อยู่ : 199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
 //				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0125564006363");
 
-				params.put("receivedBy", "ผู้รับเงิน : บริษัท นิลาริช จำกัด / NILARICH CO.,LTD");
-				params.put("receivedTel", "ติดต่อ : 0936532565");
-				params.put("receivedAddress", "ที่อยู่ : 199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
+				params.put("receivedBy", "บริษัท นิลาริช จำกัด / NILARICH CO.,LTD");
+				params.put("receivedTel", "โทร : 0936532565");
+				params.put("receivedAddress", "199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
 				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0425562000683");
 
 				String customerName = "";
@@ -163,10 +172,15 @@ public class JasperReportsService {
 					customerAddress = customerEntity.getAddress();
 				}
 
-				params.put("customerName", "ลูกค้า : " + customerName);
-				params.put("customerTel", "ติดต่อ : " + customerTel);
-				params.put("customerAddress", "ที่อยู่ : " + customerAddress);
-				params.put("date", "วันที่ : "+formattedDate);
+				String dateOrder = "";
+				if(orderEntity.getUpdatedAt() != null) {
+					dateOrder = formatterDDMMYYYY.format(orderEntity.getUpdatedAt());
+				}
+
+				params.put("customerName", "ชื่อลูกค้า/Customers : " + customerName);
+				params.put("customerTel", "ติดต่อ / Tel : " + customerTel);
+				params.put("customerAddress", "ที่อยู่ / Address : " + customerAddress);
+				params.put("date", "วันที่ / Date : "+dateOrder);
 
 				BigDecimal totalNetPrice = allPrice.add(shippingCostPrice);
 
@@ -186,6 +200,8 @@ public class JasperReportsService {
 				params.put("shippingCost", df.format(shippingCostPrice) + " บาท");
 				params.put("totalNetPrice", df.format(orderEntity.getTotalAmount()) + " บาท");
 
+				params.put("totalNetPriceText", "("+new NumberFormat().getThaiBaht(orderEntity.getTotalAmount())+")");
+
 				BigDecimal notVat = orderEntity.getTotalAmount().multiply(new BigDecimal("100"));
 				notVat = notVat.divide(new BigDecimal("107"), RoundingMode.HALF_UP);
 
@@ -194,7 +210,7 @@ public class JasperReportsService {
 				params.put("vat", df.format(vat) + " บาท");
 				params.put("notVat", df.format(notVat) + " บาท");
 
-				params.put("pathLogo", "images/logo1.png");
+				params.put("pathLogo", "images/logo1.jpg");
 
 				generateReportPdf(jasperFileName, fileName, params);
 

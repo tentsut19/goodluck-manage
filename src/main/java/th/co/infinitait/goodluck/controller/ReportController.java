@@ -31,7 +31,7 @@ public class ReportController {
     @PostMapping(value = "/receipt", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportResponse> createOrderReceiptReport(@Valid @RequestBody ReportRequest reportRequest) throws Exception {
         log.info("reportRequest : {}", reportRequest);
-        String exportPath = reportService.createOrderReceiptReport("receipt",reportRequest.getOrderIdList());
+        String exportPath = reportService.createOrderReceiptReport("receipt_v1",reportRequest.getOrderIdList());
         return ResponseEntity.ok(ReportResponse.builder().status("SUCCESS").exportPath(exportPath).build());
     }
 
