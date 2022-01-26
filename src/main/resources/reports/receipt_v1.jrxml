@@ -495,7 +495,7 @@
 					<font fontName="TH SarabunPSK" size="14" isBold="true"/>
 					<paragraph leftIndent="2"/>
 				</textElement>
-				<text><![CDATA[มูลค่าสินค้า มัดจำ]]></text>
+				<text><![CDATA[ส่วนลด]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="470" y="3" width="90" height="17" uuid="3431aec3-374e-45c7-96ae-2122b2f80bb4">
