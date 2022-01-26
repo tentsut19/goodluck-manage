@@ -158,7 +158,7 @@ public class JasperReportsService {
 //				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0125564006363");
 
 				params.put("receivedBy", "บริษัท นิลาริช จำกัด / NILARICH CO.,LTD");
-				params.put("receivedTel", "โทร : 0936532565");
+				params.put("receivedTel", "โทร : 0649955553");
 				params.put("receivedAddress", "199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
 				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0425562000683");
 
