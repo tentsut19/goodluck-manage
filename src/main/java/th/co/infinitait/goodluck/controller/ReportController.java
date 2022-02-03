@@ -8,11 +8,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import th.co.infinitait.goodluck.model.request.ReportRequest;
+import th.co.infinitait.goodluck.model.request.TransportRequest;
 import th.co.infinitait.goodluck.model.response.ReportResponse;
 import th.co.infinitait.goodluck.service.JasperReportsService;
 
 import javax.validation.Valid;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -31,7 +33,7 @@ public class ReportController {
     @PostMapping(value = "/receipt", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportResponse> createOrderReceiptReport(@Valid @RequestBody ReportRequest reportRequest) throws Exception {
         log.info("reportRequest : {}", reportRequest);
-        String exportPath = reportService.createOrderReceiptReport("receipt_v1",reportRequest.getOrderIdList());
+        String exportPath = reportService.createOrderReceiptReport("receipt_v1",reportRequest.getOrderIdList(),reportRequest.getCompanyId());
         return ResponseEntity.ok(ReportResponse.builder().status("SUCCESS").exportPath(exportPath).build());
     }
 
@@ -49,5 +51,28 @@ public class ReportController {
                 // Tell browser to display PDF if it can
                 .header("Content-Disposition", "inline; filename=\"receipt.pdf\"")
                 .body(fileContent);
+    }
+
+    @PostMapping(value = "/transport/excel", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ReportResponse> createTransportExcel(@Valid @RequestBody TransportRequest request) throws Exception {
+        log.info("request : {}", request);
+        reportService.createTransportExcel(request);
+        return ResponseEntity.ok(ReportResponse.builder().status("SUCCESS").build());
+    }
+
+    @GetMapping(value = "/transport/exportExcel/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<byte[]> loadTransportExcel(@PathVariable String name) throws IOException {
+        String fileName = "transport_order_"+name+".xlsx";
+        File file = new File("report/excel/transport/"+fileName);
+
+        byte[] fileContent = FileUtils.readFileToByteArray(file);
+        return ResponseEntity
+                .ok()
+                // Specify content type as PDF
+                .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                // Tell browser to display PDF if it can
+                .header("Content-Disposition", "inline; filename=\""+fileName+"\"")
+                .body(fileContent);
+
     }
 }

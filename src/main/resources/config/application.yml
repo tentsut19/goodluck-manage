@@ -40,11 +40,11 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://localhost:3306/goodluck_db
-    url: jdbc:mariadb://comvisitor.cvysc3moexiz.ap-southeast-1.rds.amazonaws.com/goodluck_db
+    url: jdbc:mariadb://localhost:3306/goodluck_db
+#    url: jdbc:mariadb://comvisitor.cvysc3moexiz.ap-southeast-1.rds.amazonaws.com/goodluck_db
     username: root
-#    password: root
-    password: comvisitor1234
+    password: root
+#    password: comvisitor1234
     hikari:
       maximum-pool-size: 5
       connection-timeout: 180000

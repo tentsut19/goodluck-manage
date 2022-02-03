@@ -35,7 +35,7 @@ public class ExcelHelperService {
         return true;
     }
 
-    public List<OrderRequest> excelToMap(InputStream is, String sheetName) throws IOException {
+    public List<OrderRequest> excelToMap(InputStream is, String transportationService, String sheetName) throws IOException {
         try {
             Workbook workbook = new XSSFWorkbook(is);
 
@@ -51,18 +51,29 @@ public class ExcelHelperService {
             List<OrderRequest> orderRequestList = new ArrayList<>();
 
             boolean isHeader = true;
+            int countHeader = 0;
             while (rows.hasNext()) {
                 Row currentRow = rows.next();
 
-                // skip header
-                if (isHeader) {
-                    isHeader = false;
-                    continue;
+                if("kerry".equalsIgnoreCase(transportationService)) {
+                    if(countHeader < 5){
+                        countHeader++;
+                        continue;
+                    }
+                }else{
+                    // skip header
+                    if (isHeader) {
+                        isHeader = false;
+                        continue;
+                    }
                 }
 
                 OrderRequest orderRequest = new OrderRequest();
 
                 CellReference cr = new CellReference("A"); // รหัสพัสดุ
+                if("kerry".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("J"); // รหัสพัสดุ
+                }
                 Cell cell = currentRow.getCell(cr.getCol());
                 CellValue cellValue = evaluator.evaluate(cell);
                 String parcelCode = getValueString(cellValue);

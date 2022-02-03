@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,6 +20,9 @@ public class CompanyEntity {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "parent")
+    private Long parent;
+
     @Column(name = "name")
     private String name;
 
@@ -28,24 +32,34 @@ public class CompanyEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "fax")
+    private String fax;
+
     @Column(name = "email")
     private String email;
 
-    @Column(name = "address")
-    private String address;
+    @Column(name = "vat")
+    private Float vat;
 
-    @Column(name = "DELETED_AT")
+    @Column(name = "credit_inv")
+    private Long creditInv;
+
+    @Column(name = "deleted_at")
     private Date deletedAt;
 
-    @Column(name = "CREATED_AT")
+    @Column(name = "created_at")
     private Date createdAt;
 
-    @Column(name = "CREATED_BY")
+    @Column(name = "created_by")
     private String createdBy;
 
-    @Column(name = "UPDATED_AT")
+    @Column(name = "updated_at")
     private Date updatedAt;
 
-    @Column(name = "UPDATED_BY")
+    @Column(name = "updated_by")
     private String updatedBy;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "company_id")
+    private List<AddressEntity> addressList;
 }

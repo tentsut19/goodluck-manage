@@ -42,11 +42,13 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/parcel-code")
-    public ResponseEntity<OrderResponse> uploadFileUpdateParcelCode(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<OrderResponse> uploadFileUpdateParcelCode(@RequestParam("file") MultipartFile file,
+                                                                    @RequestParam("transportationService") String transportationService
+                                                                    ) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                fileService.uploadFileUpdateParcelCode(file,cabsatPayload.getUserId());
+                fileService.uploadFileUpdateParcelCode(file,transportationService,cabsatPayload.getUserId());
                 return ResponseEntity.ok(OrderResponse.builder().build());
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
@@ -58,11 +60,12 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/success")
-    public ResponseEntity<OrderResponse> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<OrderResponse> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file,
+                                                                 @RequestParam("transportationService") String transportationService) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                fileService.uploadFileUpdateSuccess(file,cabsatPayload.getUserId());
+                fileService.uploadFileUpdateSuccess(file,transportationService,cabsatPayload.getUserId());
                 return ResponseEntity.ok(OrderResponse.builder().build());
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
@@ -74,11 +77,12 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/cancel")
-    public ResponseEntity<OrderResponse> uploadFileUpdateCancel(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<OrderResponse> uploadFileUpdateCancel(@RequestParam("file") MultipartFile file,
+                                                                @RequestParam("transportationService") String transportationService) {
         String message = "";
         if (excelHelperService.hasExcelFormat(file)) {
             try {
-                fileService.uploadFileUpdateCancel(file,cabsatPayload.getUserId());
+                fileService.uploadFileUpdateCancel(file,transportationService,cabsatPayload.getUserId());
                 return ResponseEntity.ok(OrderResponse.builder().build());
             } catch (Exception e) {
                 log.error(e.getMessage(),e);

@@ -7,16 +7,23 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSaver;
 import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.poi.ss.formula.functions.T;
+import org.jxls.common.Context;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import th.co.infinitait.goodluck.entity.CustomerEntity;
-import th.co.infinitait.goodluck.entity.OrderEntity;
-import th.co.infinitait.goodluck.entity.OrderProductEntity;
-import th.co.infinitait.goodluck.entity.SettingProductEntity;
+import th.co.infinitait.goodluck.entity.*;
 import th.co.infinitait.goodluck.exception.InvalidParameterException;
 import th.co.infinitait.goodluck.model.OrderDetailReport;
+import th.co.infinitait.goodluck.model.request.TransportRequest;
+import th.co.infinitait.goodluck.model.response.TransportResponse;
+import th.co.infinitait.goodluck.repository.CompanyRepository;
 import th.co.infinitait.goodluck.repository.OrderProductRepository;
 import th.co.infinitait.goodluck.repository.OrderRepository;
 import th.co.infinitait.goodluck.repository.SettingProductRepository;
@@ -46,6 +53,10 @@ public class JasperReportsService {
 	private final OrderProductRepository orderProductRepository;
 
 	private final SettingProductRepository settingProductRepository;
+
+	private final CompanyRepository companyRepository;
+
+	private final GenerateExcelService generateExcelService;
 
 	@Value("${report-generate-path}")
 	private String pdfFilePath;
@@ -96,13 +107,19 @@ public class JasperReportsService {
 		}
 	}
 
-	public String createOrderReceiptReport(String jasperFileName, List<Long> orderIdList) throws IOException {
+	public String createOrderReceiptReport(String jasperFileName, List<Long> orderIdList, Long companyId) throws IOException {
 		log.info("jasperFileName : {}, orderIdList : {}",jasperFileName, orderIdList);
 		SimpleDateFormat formatterDDMMYYYYHHmm = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("th", "TH"));
 		SimpleDateFormat formatterDDMMYYYY = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 		DecimalFormat df = new DecimalFormat( "#,##0.00" );
 		String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		Map<String, Object> params = new HashMap<>();
+
+		CompanyEntity companyEntity = new CompanyEntity();
+		Optional<CompanyEntity> optionalCompanyEntity = companyRepository.findById(companyId);
+		if(optionalCompanyEntity.isPresent()){
+			companyEntity = optionalCompanyEntity.get();
+		}
 
 		if(!CollectionUtils.isEmpty(orderIdList)){
 			PDFMergerUtility ut = new PDFMergerUtility();
@@ -157,10 +174,24 @@ public class JasperReportsService {
 //				params.put("receivedAddress", "ที่อยู่ : 199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
 //				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0125564006363");
 
-				params.put("receivedBy", "บริษัท นิลาริช จำกัด / NILARICH CO.,LTD");
-				params.put("receivedTel", "โทร : 0649955553");
-				params.put("receivedAddress", "199/88 หมู่บ้านเซนโทร ราชพฤกษ์ 2 หมู่ที่ 7 ตำบลบางกร่อง อำเภอเมืองนนทบุรี จังหวัดนนทบุรี 11000");
-				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : 0425562000683");
+				params.put("receivedBy", companyEntity.getName());
+				params.put("receivedTel", "โทร : "+companyEntity.getPhoneNumber());
+
+				String receivedAddress = "";
+				if(!CollectionUtils.isEmpty(companyEntity.getAddressList())){
+					AddressEntity address = companyEntity.getAddressList().get(companyEntity.getAddressList().size()-1);
+					if(address != null){
+						receivedAddress =
+								(StringUtils.isEmpty(address.getDetail()) ? "" : address.getDetail()) + " " +
+								(StringUtils.isEmpty(address.getSubdistrict()) ? "" : "ตำบล/แขวง "+address.getSubdistrict()) + " " +
+								(StringUtils.isEmpty(address.getDistrict()) ? "" : "อำเภอ/เขต "+address.getDistrict()) + " " +
+								(StringUtils.isEmpty(address.getProvince()) ? "" : "จังหวัด " + address.getProvince()) + " " +
+								(StringUtils.isEmpty(address.getPostCode()) ? "" : address.getPostCode());
+					}
+				}
+
+				params.put("receivedAddress", receivedAddress);
+				params.put("receivedTaxId", "เลขประจำตัวผู้เสียภาษี : "+companyEntity.getTaxIdentificationNumber());
 
 				String customerName = "";
 				String customerTel = "";
@@ -232,5 +263,100 @@ public class JasperReportsService {
 		}
 
 		return "";
+	}
+
+	public void createTransportExcel(TransportRequest request) throws Exception {
+		List<TransportResponse> transportResponseList = new ArrayList<>();
+		String template = "";
+		List<Long> orderIdList = request.getOrderIdList();
+		if(!CollectionUtils.isEmpty(orderIdList)) {
+			int no = 1;
+			for (Long orderId : orderIdList) {
+				Optional<OrderEntity> optional = orderRepository.findById(orderId);
+				if(!optional.isPresent()){
+					continue;
+				}
+				OrderEntity orderEntity = optional.get();
+				TransportResponse transportResponse = new TransportResponse();
+				transportResponse.setNo(no);
+				transportResponse.setConsigneeName(orderEntity.getRecipientName());
+				if(orderEntity.getCustomer() != null) {
+					CustomerEntity customerEntity = orderEntity.getCustomer();
+					String address = customerEntity.getAddress();
+					transportResponse.setAddress1(address);
+					if("kerry".equalsIgnoreCase(request.getTransport())){
+						String[] address1 = address.split("ต\\.");
+						if(address1.length == 2){
+							transportResponse.setAddress1(address1[0]);
+							transportResponse.setAddress2("ต."+address1[1]);
+						}else{
+							address1 = address.split("แขวง");
+							if(address1.length == 2){
+								transportResponse.setAddress1(address1[0]);
+								transportResponse.setAddress2("แขวง"+address1[1]);
+							}
+						}
+					}
+					if(!StringUtils.isEmpty(customerEntity.getAddress())) {
+						String[] postalCodes = customerEntity.getAddress().split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
+						String postalCode = postalCodes[postalCodes.length - 1];
+						if(postalCode.length() == 5) {
+							transportResponse.setPostalCode(postalCode);
+						}
+					}
+					transportResponse.setPhoneNumber(customerEntity.getPhoneNumber());
+				}
+				transportResponse.setCod(orderEntity.getTotalAmount());
+
+				float weightKg = 0f;
+				List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
+				if(!CollectionUtils.isEmpty(orderProductEntityList)) {
+					if("kerry".equalsIgnoreCase(request.getTransport())) {
+						transportResponse.setProduct(orderProductEntityList.get(orderProductEntityList.size() - 1).getProductName());
+					}
+					if("flash".equalsIgnoreCase(request.getTransport())) {
+						for (OrderProductEntity orderProductEntity : orderProductEntityList) {
+							List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
+							if (!CollectionUtils.isEmpty(settingProductEntityList)) {
+								SettingProductEntity settingProductEntity = settingProductEntityList.get(settingProductEntityList.size() - 1);
+								weightKg += settingProductEntity.getWeightKg();
+							}
+						}
+					}
+				}
+				transportResponse.setWeightKg(weightKg);
+				transportResponseList.add(transportResponse);
+				no++;
+			}
+		}
+
+		if("flash".equalsIgnoreCase(request.getTransport())){
+			template = "template/transport_order_flash_template.xlsx";
+
+		}else if("kerry".equalsIgnoreCase(request.getTransport())){
+			template = "template/transport_order_kerry_template.xlsx";
+
+		}
+		String pathOutput = "report/excel/transport";
+		String fileName = "transport_order_"+request.getTransport()+".xlsx";
+
+		genExcel(transportResponseList,template,pathOutput,fileName);
+	}
+
+	public void genExcel(List<?> models, String template, String pathOutput, String fileName) throws Exception {
+
+		Context context = new Context();
+		// Header
+//        context.putVar("exportDate", exportDate);
+		// Detail
+		context.putVar("models", models);
+		// Footer
+//        context.putVar("totals", total);
+//        context.putVar("timePerWorkTotal", timePerWorkTotal);
+//        context.putVar("dayWork", dayWork);
+
+		File file = generateExcelService.genExcel(template, fileName, pathOutput, context);
+		byte[] fileContent = FileUtils.readFileToByteArray(file);
+//        fileService.deleteFile(file);
 	}
 }

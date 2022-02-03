@@ -30,6 +30,22 @@ class CabsatApplicationTests {
 
 	}
 
+	@Test
+	void test_split_v1() throws ParseException {
+		String str = "โรงพยาบาลส่งเสริมสุขภาพตำบลบุ่งคำ ต.พรสวรรค์ อ.นาจะหลวย จ.อุบลราชธานี  34280";
+		String[] s = str.split("ต\\.");
+		for (String s1 : s) {
+			System.out.println(s1);
+		}
+		System.out.println("================");
+		str = "2441/2 ซ.รามคำแหง69/1 แขวงหัวหมาก เขตบางกะปิ กทม. 10240";
+		s = str.split("แขวง");
+		System.out.println(s.length);
+		for (String s1 : s) {
+			System.out.println(s1);
+		}
+	}
+
 	boolean checkTime(LocalDateTime localDateTime) throws ParseException {
 		int h = localDateTime.getHour();
 		System.out.println(h);

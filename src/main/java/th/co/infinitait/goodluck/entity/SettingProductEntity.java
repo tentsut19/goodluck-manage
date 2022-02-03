@@ -46,6 +46,18 @@ public class SettingProductEntity {
     @Column(name = "format_product_size")
     private Boolean formatProductSize;
 
+    @Column(name = "weight_kg")
+    private Float weightKg;
+
+    @Column(name = "length_cm")
+    private Float lengthCm;
+
+    @Column(name = "width_cm")
+    private Float widthCm;
+
+    @Column(name = "height_cm")
+    private Float heightCm;
+
     @Column(name = "deleted_at")
     private Date deletedAt;
 

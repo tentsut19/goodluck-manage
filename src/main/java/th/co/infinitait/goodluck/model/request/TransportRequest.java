@@ -1,5 +1,6 @@
 package th.co.infinitait.goodluck.model.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.util.List;
@@ -10,7 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ReportRequest {
-    private Long companyId;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TransportRequest {
+    private String transport;
     private List<Long> orderIdList;
 }
