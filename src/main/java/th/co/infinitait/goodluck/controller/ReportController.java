@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import th.co.infinitait.goodluck.model.request.ReportRequest;
 import th.co.infinitait.goodluck.model.request.TransportRequest;
+import th.co.infinitait.goodluck.model.response.GenTransportResponse;
+import th.co.infinitait.goodluck.model.response.OrderResponse;
 import th.co.infinitait.goodluck.model.response.ReportResponse;
 import th.co.infinitait.goodluck.service.JasperReportsService;
 
@@ -17,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/report/")
@@ -56,8 +59,14 @@ public class ReportController {
     @PostMapping(value = "/transport/excel", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportResponse> createTransportExcel(@Valid @RequestBody TransportRequest request) throws Exception {
         log.info("request : {}", request);
-        reportService.createTransportExcel(request);
-        return ResponseEntity.ok(ReportResponse.builder().status("SUCCESS").build());
+        String uuid = reportService.startTransportExcel(request);
+        reportService.createTransportExcel(uuid,request);
+        return ResponseEntity.ok(ReportResponse.builder().uuid(uuid).status("SUCCESS").build());
+    }
+
+    @GetMapping(value = "/transport/status/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenTransportResponse> getTransportStatus(@PathVariable String uuid) throws Exception {
+        return ResponseEntity.ok(reportService.getTransportStatus(uuid));
     }
 
     @GetMapping(value = "/transport/exportExcel/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,6 +82,5 @@ public class ReportController {
                 // Tell browser to display PDF if it can
                 .header("Content-Disposition", "inline; filename=\""+fileName+"\"")
                 .body(fileContent);
-
     }
 }

@@ -8,6 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 public class ReportResponse {
+    private String uuid;
     private String status;
     private String exportPath;
     private byte[] desc;

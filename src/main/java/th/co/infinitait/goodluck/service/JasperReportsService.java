@@ -6,6 +6,7 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSaver;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.poi.ss.formula.functions.T;
 import org.jxls.common.Context;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -22,11 +24,8 @@ import th.co.infinitait.goodluck.entity.*;
 import th.co.infinitait.goodluck.exception.InvalidParameterException;
 import th.co.infinitait.goodluck.model.OrderDetailReport;
 import th.co.infinitait.goodluck.model.request.TransportRequest;
-import th.co.infinitait.goodluck.model.response.TransportResponse;
-import th.co.infinitait.goodluck.repository.CompanyRepository;
-import th.co.infinitait.goodluck.repository.OrderProductRepository;
-import th.co.infinitait.goodluck.repository.OrderRepository;
-import th.co.infinitait.goodluck.repository.SettingProductRepository;
+import th.co.infinitait.goodluck.model.response.*;
+import th.co.infinitait.goodluck.repository.*;
 import th.co.infinitait.goodluck.util.NumberFormat;
 
 import java.io.ByteArrayOutputStream;
@@ -57,6 +56,8 @@ public class JasperReportsService {
 	private final CompanyRepository companyRepository;
 
 	private final GenerateExcelService generateExcelService;
+
+	private final GenTransportRepository genTransportRepository;
 
 	@Value("${report-generate-path}")
 	private String pdfFilePath;
@@ -265,82 +266,135 @@ public class JasperReportsService {
 		return "";
 	}
 
-	public void createTransportExcel(TransportRequest request) throws Exception {
-		List<TransportResponse> transportResponseList = new ArrayList<>();
-		String template = "";
-		List<Long> orderIdList = request.getOrderIdList();
-		if(!CollectionUtils.isEmpty(orderIdList)) {
-			int no = 1;
-			for (Long orderId : orderIdList) {
-				Optional<OrderEntity> optional = orderRepository.findById(orderId);
-				if(!optional.isPresent()){
-					continue;
-				}
-				OrderEntity orderEntity = optional.get();
-				TransportResponse transportResponse = new TransportResponse();
-				transportResponse.setNo(no);
-				transportResponse.setConsigneeName(orderEntity.getRecipientName());
-				if(orderEntity.getCustomer() != null) {
-					CustomerEntity customerEntity = orderEntity.getCustomer();
-					String address = customerEntity.getAddress();
-					transportResponse.setAddress1(address);
-					if("kerry".equalsIgnoreCase(request.getTransport())){
-						String[] address1 = address.split("ต\\.");
-						if(address1.length == 2){
-							transportResponse.setAddress1(address1[0]);
-							transportResponse.setAddress2("ต."+address1[1]);
-						}else{
-							address1 = address.split("แขวง");
-							if(address1.length == 2){
-								transportResponse.setAddress1(address1[0]);
-								transportResponse.setAddress2("แขวง"+address1[1]);
-							}
-						}
-					}
-					if(!StringUtils.isEmpty(customerEntity.getAddress())) {
-						String[] postalCodes = customerEntity.getAddress().split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
-						String postalCode = postalCodes[postalCodes.length - 1];
-						if(postalCode.length() == 5) {
-							transportResponse.setPostalCode(postalCode);
-						}
-					}
-					transportResponse.setPhoneNumber(customerEntity.getPhoneNumber());
-				}
-				transportResponse.setCod(orderEntity.getTotalAmount());
+	public GenTransportResponse getTransportStatus(String uuid) throws Exception {
+		GenTransportResponse response = new GenTransportResponse();
+		Optional<GenTransportEntity> optionalGenTransport = genTransportRepository.findById(uuid);
+		if(optionalGenTransport.isPresent()){
+			GenTransportEntity genTransportEntity = optionalGenTransport.get();
+			response.setId(genTransportEntity.getUuid());
+			response.setStatus(genTransportEntity.getStatus().name());
+			response.setState(genTransportEntity.getState().name());
+			response.setErrorMessage(genTransportEntity.getErrorMessage());
+			response.setCreatedAt(genTransportEntity.getCreatedAt());
+			response.setCreatedBy(genTransportEntity.getCreatedBy());
+			response.setUpdatedAt(genTransportEntity.getUpdatedAt());
+			response.setUpdatedBy(genTransportEntity.getUpdatedBy());
+		}
+		return response;
+	}
 
-				float weightKg = 0f;
-				List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
-				if(!CollectionUtils.isEmpty(orderProductEntityList)) {
-					if("kerry".equalsIgnoreCase(request.getTransport())) {
-						transportResponse.setProduct(orderProductEntityList.get(orderProductEntityList.size() - 1).getProductName());
+	public String startTransportExcel(TransportRequest request) throws Exception {
+		String uuid = RandomStringUtils.randomAlphanumeric(64);
+		GenTransportEntity genTransportEntity = new GenTransportEntity();
+		genTransportEntity.setUuid(uuid);
+		genTransportEntity.setStatus(EStatus.PROCESSING);
+		genTransportEntity.setState(EState.PROCESSING);
+		genTransportEntity.setCreatedAt(new Date());
+		genTransportEntity.setCreatedBy("test");
+		genTransportRepository.save(genTransportEntity);
+		return uuid;
+	}
+
+	@Async("taskExecutor")
+	public void createTransportExcel(String uuid,TransportRequest request) throws Exception {
+		try {
+			List<TransportResponse> transportResponseList = new ArrayList<>();
+			String template = "";
+			List<Long> orderIdList = request.getOrderIdList();
+			if (!CollectionUtils.isEmpty(orderIdList)) {
+				int no = 1;
+				for (Long orderId : orderIdList) {
+					Optional<OrderEntity> optional = orderRepository.findById(orderId);
+					if (!optional.isPresent()) {
+						continue;
 					}
-					if("flash".equalsIgnoreCase(request.getTransport())) {
-						for (OrderProductEntity orderProductEntity : orderProductEntityList) {
-							List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
-							if (!CollectionUtils.isEmpty(settingProductEntityList)) {
-								SettingProductEntity settingProductEntity = settingProductEntityList.get(settingProductEntityList.size() - 1);
-								weightKg += settingProductEntity.getWeightKg();
+					OrderEntity orderEntity = optional.get();
+					TransportResponse transportResponse = new TransportResponse();
+					transportResponse.setNo(no);
+					transportResponse.setConsigneeName(orderEntity.getRecipientName());
+					if (orderEntity.getCustomer() != null) {
+						CustomerEntity customerEntity = orderEntity.getCustomer();
+						String address = customerEntity.getAddress();
+						transportResponse.setAddress1(address);
+						if ("kerry".equalsIgnoreCase(request.getTransport())) {
+							String[] address1 = address.split("ต\\.");
+							if (address1.length == 2) {
+								transportResponse.setAddress1(address1[0]);
+								transportResponse.setAddress2("ต." + address1[1]);
+							} else {
+								address1 = address.split("แขวง");
+								if (address1.length == 2) {
+									transportResponse.setAddress1(address1[0]);
+									transportResponse.setAddress2("แขวง" + address1[1]);
+								}
+							}
+						}
+						if (!StringUtils.isEmpty(customerEntity.getAddress())) {
+							String[] postalCodes = customerEntity.getAddress().split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
+							String postalCode = postalCodes[postalCodes.length - 1];
+							if (postalCode.length() == 5) {
+								transportResponse.setPostalCode(postalCode);
+							}
+						}
+						transportResponse.setPhoneNumber(customerEntity.getPhoneNumber());
+					}
+					transportResponse.setCod(orderEntity.getTotalAmount());
+
+					float weightKg = 0f;
+					List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
+					if (!CollectionUtils.isEmpty(orderProductEntityList)) {
+						if ("kerry".equalsIgnoreCase(request.getTransport())) {
+							transportResponse.setProduct(orderProductEntityList.get(orderProductEntityList.size() - 1).getProductName());
+						}
+						if ("flash".equalsIgnoreCase(request.getTransport())) {
+							for (OrderProductEntity orderProductEntity : orderProductEntityList) {
+								List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
+								if (!CollectionUtils.isEmpty(settingProductEntityList)) {
+									SettingProductEntity settingProductEntity = settingProductEntityList.get(settingProductEntityList.size() - 1);
+									weightKg += settingProductEntity.getWeightKg();
+								}
 							}
 						}
 					}
+					transportResponse.setWeightKg(weightKg);
+					transportResponseList.add(transportResponse);
+					no++;
 				}
-				transportResponse.setWeightKg(weightKg);
-				transportResponseList.add(transportResponse);
-				no++;
+			}
+
+			if ("flash".equalsIgnoreCase(request.getTransport())) {
+				template = "template/transport_order_flash_template.xlsx";
+
+			} else if ("kerry".equalsIgnoreCase(request.getTransport())) {
+				template = "template/transport_order_kerry_template.xlsx";
+
+			}
+			String pathOutput = "report/excel/transport";
+			String fileName = "transport_order_" + request.getTransport() + ".xlsx";
+
+			genExcel(transportResponseList, template, pathOutput, fileName);
+			Optional<GenTransportEntity> optionalGenTransport = genTransportRepository.findById(uuid);
+			if(optionalGenTransport.isPresent()){
+				GenTransportEntity genTransportEntity = optionalGenTransport.get();
+				genTransportEntity.setState(EState.SUCCESS);
+				genTransportEntity.setStatus(EStatus.SUCCESS);
+				genTransportEntity.setUpdatedAt(new Date());
+				genTransportEntity.setUpdatedBy("test");
+				genTransportRepository.save(genTransportEntity);
+			}
+			log.info("End createTransportExcel");
+		}catch (Exception e){
+			Optional<GenTransportEntity> optionalGenTransport = genTransportRepository.findById(uuid);
+			if(optionalGenTransport.isPresent()){
+				GenTransportEntity genTransportEntity = optionalGenTransport.get();
+				genTransportEntity.setState(EState.FAIL);
+				genTransportEntity.setStatus(EStatus.FAIL);
+				genTransportEntity.setErrorMessage(e.getMessage());
+				genTransportEntity.setUpdatedAt(new Date());
+				genTransportEntity.setUpdatedBy("test");
+				genTransportRepository.save(genTransportEntity);
 			}
 		}
-
-		if("flash".equalsIgnoreCase(request.getTransport())){
-			template = "template/transport_order_flash_template.xlsx";
-
-		}else if("kerry".equalsIgnoreCase(request.getTransport())){
-			template = "template/transport_order_kerry_template.xlsx";
-
-		}
-		String pathOutput = "report/excel/transport";
-		String fileName = "transport_order_"+request.getTransport()+".xlsx";
-
-		genExcel(transportResponseList,template,pathOutput,fileName);
 	}
 
 	public void genExcel(List<?> models, String template, String pathOutput, String fileName) throws Exception {

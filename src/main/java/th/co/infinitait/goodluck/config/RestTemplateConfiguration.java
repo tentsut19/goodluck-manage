@@ -9,13 +9,25 @@ import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @Configuration
 public class RestTemplateConfiguration {
+
+    @Bean(name = "taskExecutor")
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+//        executor.setAwaitTerminationMillis(conf.getAwaitTerminationPeriod());
+//        executor.setWaitForTasksToCompleteOnShutdown(conf.isShutdownAwaitTermination());
+        executor.setThreadNamePrefix("GoodLuckThread-");
+        return executor;
+    }
 
     @Bean
     public RestTemplate restTemplate() {
