@@ -332,12 +332,9 @@ public class JasperReportsService {
 						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
 							if("cod".equalsIgnoreCase(orderEntity.getPaymentChannel())) {
 								address = "Cod-" + orderEntity.getTotalAmount() + " "
-										+ orderEntity.getProductDraftName() + " "
-										+ orderEntity.getQuantity() + " "
 										+ address;
 							}
 							transportResponse.setAddress1(address);
-							transportResponse.setCustomerOrderNumber(orderEntity.getProductDraftName()+" "+orderEntity.getQuantity());
 						}
 						if (!StringUtils.isEmpty(customerEntity.getAddress())) {
 							String[] postalCodes = customerEntity.getAddress().split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
@@ -350,12 +347,26 @@ public class JasperReportsService {
 					}
 					transportResponse.setCod(orderEntity.getTotalAmount());
 
-//					float weightKg = 0f;
-//					List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
-//					if (!CollectionUtils.isEmpty(orderProductEntityList)) {
-//						if ("kerry".equalsIgnoreCase(request.getTransport())) {
-//							transportResponse.setProduct(orderProductEntityList.get(orderProductEntityList.size() - 1).getProductName());
-//						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
+					float weightKg = 1f;
+					List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
+					if (!CollectionUtils.isEmpty(orderProductEntityList)) {
+						StringBuilder product = new StringBuilder();
+						int i = 0;
+						for(OrderProductEntity orderProduct:orderProductEntityList){
+							String productName = orderProduct.getProductName();
+							Integer productQuantity = orderProduct.getProductQuantity();
+							if(i==0){
+								product = new StringBuilder(productName + " " + productQuantity);
+							}else{
+								product.append(" ").append(productName).append(" ").append(productQuantity);
+							}
+							i++;
+						}
+
+						if ("kerry".equalsIgnoreCase(request.getTransport())) {
+							transportResponse.setProduct(product.toString());
+						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
+							transportResponse.setCustomerOrderNumber(product.toString());
 //							for (OrderProductEntity orderProductEntity : orderProductEntityList) {
 //								List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
 //								if (!CollectionUtils.isEmpty(settingProductEntityList)) {
@@ -363,9 +374,9 @@ public class JasperReportsService {
 //									weightKg += settingProductEntity.getWeightKg();
 //								}
 //							}
-//						}
-//					}
-//					transportResponse.setWeightKg(weightKg);
+						}
+					}
+					transportResponse.setWeightKg(weightKg);
 					transportResponseList.add(transportResponse);
 					no++;
 				}
