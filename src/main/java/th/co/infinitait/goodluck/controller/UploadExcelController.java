@@ -55,7 +55,7 @@ public class UploadExcelController {
                 throw new NotFoundException(e.getMessage());
             }
         }
-        message = "Please upload an excel file!";
+        message = "Please upload an excel file!!";
         throw new NotFoundException(message);
     }
 
