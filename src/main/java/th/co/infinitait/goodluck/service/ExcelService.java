@@ -44,15 +44,15 @@ public class ExcelService {
             updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
             updateOrder.setCreatedBy(userId);
             updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
             updateOrderEntityList.add(updateOrder);
-
             log.info("fail size : {}", updateOrderEntityList.size());
-            updateOrderRepository.saveAll(updateOrderEntityList);
-
             return;
         }
         updateOrderRepository.deleteByState("Shipping");
+        int index = 1;
         for (OrderRequest orderRequest : orderRequestList) {
+            log.info("index : {}", index++);
             try {
                 List<OrderEntity> orderList = orderRepository.findByRecipientName(orderRequest.getRecipientName().trim());
                 if (!CollectionUtils.isEmpty(orderList)) {
@@ -76,6 +76,7 @@ public class ExcelService {
                         updateOrder.setRecipientName(orderRequest.getRecipientName());
                         updateOrder.setCreatedBy(userId);
                         updateOrder.setCreatedAt(new Date());
+                        updateOrderRepository.save(updateOrder);
                         updateOrderEntityList.add(updateOrder);
                     }else{
                         OrderEntity orderEntity = orderList.get(0);
@@ -97,6 +98,7 @@ public class ExcelService {
                             updateOrder.setRecipientName(orderRequest.getRecipientName());
                             updateOrder.setCreatedBy(userId);
                             updateOrder.setCreatedAt(new Date());
+                            updateOrderRepository.save(updateOrder);
                             updateOrderEntityList.add(updateOrder);
                         } else {
                             UpdateOrderEntity updateOrder = new UpdateOrderEntity();
@@ -107,6 +109,7 @@ public class ExcelService {
                             updateOrder.setRecipientName(orderRequest.getRecipientName());
                             updateOrder.setCreatedBy(userId);
                             updateOrder.setCreatedAt(new Date());
+                            updateOrderRepository.save(updateOrder);
                             updateOrderEntityList.add(updateOrder);
                         }
                     }
@@ -119,6 +122,7 @@ public class ExcelService {
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
                     updateOrder.setCreatedBy(userId);
                     updateOrder.setCreatedAt(new Date());
+                    updateOrderRepository.save(updateOrder);
                     updateOrderEntityList.add(updateOrder);
                 }
             } catch (Exception e) {
@@ -130,12 +134,12 @@ public class ExcelService {
                 updateOrder.setRecipientName(orderRequest.getRecipientName());
                 updateOrder.setCreatedBy(userId);
                 updateOrder.setCreatedAt(new Date());
+                updateOrderRepository.save(updateOrder);
                 updateOrderEntityList.add(updateOrder);
             }
         }
 
-        log.info("fail size : {}", updateOrderEntityList.size());
-        updateOrderRepository.saveAll(updateOrderEntityList);
+        log.info("updateOrderEntityList size : {}", updateOrderEntityList.size());
     }
 
     @Async("taskExecutor")
@@ -154,15 +158,17 @@ public class ExcelService {
             updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
             updateOrder.setCreatedBy(userId);
             updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
             updateOrderEntityList.add(updateOrder);
 
             log.info("fail size : {}", updateOrderEntityList.size());
-            updateOrderRepository.saveAll(updateOrderEntityList);
 
             return;
         }
         updateOrderRepository.deleteByState("Success");
+        int index = 1;
         for (OrderRequest orderRequest : orderRequestList) {
+            log.info("index : {}", index++);
             try {
                 Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode().trim());
                 if (optional.isPresent()) {
@@ -181,6 +187,7 @@ public class ExcelService {
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
                     updateOrder.setCreatedBy(userId);
                     updateOrder.setCreatedAt(new Date());
+                    updateOrderRepository.save(updateOrder);
                     updateOrderEntityList.add(updateOrder);
                 } else {
                     UpdateOrderEntity updateOrder = new UpdateOrderEntity();
@@ -191,6 +198,7 @@ public class ExcelService {
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
                     updateOrder.setCreatedBy(userId);
                     updateOrder.setCreatedAt(new Date());
+                    updateOrderRepository.save(updateOrder);
                     updateOrderEntityList.add(updateOrder);
                 }
             } catch (Exception e) {
@@ -202,12 +210,12 @@ public class ExcelService {
                 updateOrder.setRecipientName(orderRequest.getRecipientName());
                 updateOrder.setCreatedBy(userId);
                 updateOrder.setCreatedAt(new Date());
+                updateOrderRepository.save(updateOrder);
                 updateOrderEntityList.add(updateOrder);
             }
         }
 
-        log.info("fail size : {}", updateOrderEntityList.size());
-        updateOrderRepository.saveAll(updateOrderEntityList);
+        log.info("updateOrderEntityList size : {}", updateOrderEntityList.size());
     }
 
     @Async("taskExecutor")
@@ -226,10 +234,10 @@ public class ExcelService {
             updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
             updateOrder.setCreatedBy(userId);
             updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
             updateOrderEntityList.add(updateOrder);
 
             log.info("fail size : {}", updateOrderEntityList.size());
-            updateOrderRepository.saveAll(updateOrderEntityList);
 
             return;
         }
@@ -252,6 +260,7 @@ public class ExcelService {
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
                     updateOrder.setCreatedBy(userId);
                     updateOrder.setCreatedAt(new Date());
+                    updateOrderRepository.save(updateOrder);
                     updateOrderEntityList.add(updateOrder);
                 } else {
                     UpdateOrderEntity updateOrder = new UpdateOrderEntity();
@@ -262,6 +271,7 @@ public class ExcelService {
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
                     updateOrder.setCreatedBy(userId);
                     updateOrder.setCreatedAt(new Date());
+                    updateOrderRepository.save(updateOrder);
                     updateOrderEntityList.add(updateOrder);
                 }
             } catch (Exception e) {
@@ -273,12 +283,12 @@ public class ExcelService {
                 updateOrder.setRecipientName(orderRequest.getRecipientName());
                 updateOrder.setCreatedBy(userId);
                 updateOrder.setCreatedAt(new Date());
+                updateOrderRepository.save(updateOrder);
                 updateOrderEntityList.add(updateOrder);
             }
         }
 
-        log.info("fail size : {}", updateOrderEntityList.size());
-        updateOrderRepository.saveAll(updateOrderEntityList);
+        log.info("updateOrderEntityList size : {}", updateOrderEntityList.size());
     }
 
 }
