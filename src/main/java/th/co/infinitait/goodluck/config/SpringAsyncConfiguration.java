@@ -55,7 +55,7 @@ public class SpringAsyncConfiguration implements AsyncConfigurer {
                     updateOrder.setState(state);
                     updateOrder.setCreatedBy("system");
                     updateOrder.setCreatedAt(new Date());
-                    updateOrderRepository.save(updateOrder);
+//                    updateOrderRepository.save(updateOrder);
                 }
                 for (Object param : params) {
                     log.info("Parameter value             : {}", param);

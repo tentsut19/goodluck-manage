@@ -315,7 +315,7 @@ public class JasperReportsService {
 					if (orderEntity.getCustomer() != null) {
 						CustomerEntity customerEntity = orderEntity.getCustomer();
 						String address = customerEntity.getAddress();
-						transportResponse.setAddress1(address);
+
 						if ("kerry".equalsIgnoreCase(request.getTransport())) {
 							String[] address1 = address.split("ต\\.");
 							if (address1.length == 2) {
@@ -328,6 +328,16 @@ public class JasperReportsService {
 									transportResponse.setAddress2("แขวง" + address1[1]);
 								}
 							}
+							transportResponse.setProduct(orderEntity.getProductDraftName()+" "+orderEntity.getQuantity());
+						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
+							if("cod".equalsIgnoreCase(orderEntity.getPaymentChannel())) {
+								address = "Cod-" + orderEntity.getTotalAmount() + " "
+										+ orderEntity.getProductDraftName() + " "
+										+ orderEntity.getQuantity() + " "
+										+ address;
+							}
+							transportResponse.setAddress1(address);
+							transportResponse.setCustomerOrderNumber(orderEntity.getProductDraftName()+" "+orderEntity.getQuantity());
 						}
 						if (!StringUtils.isEmpty(customerEntity.getAddress())) {
 							String[] postalCodes = customerEntity.getAddress().split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
@@ -340,23 +350,22 @@ public class JasperReportsService {
 					}
 					transportResponse.setCod(orderEntity.getTotalAmount());
 
-					float weightKg = 0f;
-					List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
-					if (!CollectionUtils.isEmpty(orderProductEntityList)) {
-						if ("kerry".equalsIgnoreCase(request.getTransport())) {
-							transportResponse.setProduct(orderProductEntityList.get(orderProductEntityList.size() - 1).getProductName());
-						}
-						if ("flash".equalsIgnoreCase(request.getTransport())) {
-							for (OrderProductEntity orderProductEntity : orderProductEntityList) {
-								List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
-								if (!CollectionUtils.isEmpty(settingProductEntityList)) {
-									SettingProductEntity settingProductEntity = settingProductEntityList.get(settingProductEntityList.size() - 1);
-									weightKg += settingProductEntity.getWeightKg();
-								}
-							}
-						}
-					}
-					transportResponse.setWeightKg(weightKg);
+//					float weightKg = 0f;
+//					List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
+//					if (!CollectionUtils.isEmpty(orderProductEntityList)) {
+//						if ("kerry".equalsIgnoreCase(request.getTransport())) {
+//							transportResponse.setProduct(orderProductEntityList.get(orderProductEntityList.size() - 1).getProductName());
+//						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
+//							for (OrderProductEntity orderProductEntity : orderProductEntityList) {
+//								List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
+//								if (!CollectionUtils.isEmpty(settingProductEntityList)) {
+//									SettingProductEntity settingProductEntity = settingProductEntityList.get(settingProductEntityList.size() - 1);
+//									weightKg += settingProductEntity.getWeightKg();
+//								}
+//							}
+//						}
+//					}
+//					transportResponse.setWeightKg(weightKg);
 					transportResponseList.add(transportResponse);
 					no++;
 				}

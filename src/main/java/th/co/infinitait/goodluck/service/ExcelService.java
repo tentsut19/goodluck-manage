@@ -29,18 +29,21 @@ public class ExcelService {
     private final UpdateOrderRepository updateOrderRepository;
 
     @Async("taskExecutor")
-    public void uploadFileUpdateParcelCode(MultipartFile file, String transportationService, String userId) throws Exception {
+    public void uploadFileUpdateParcelCode(MultipartFile file, String transportationService, String userId, String uuid) throws Exception {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMapParcelCode(file.getInputStream(),transportationService,"Order Template");
         log.info("orderRequestList : {}", orderRequestList.size());
-        updateParcelCode(orderRequestList,transportationService,userId);
+        updateParcelCode(orderRequestList,transportationService,userId,uuid);
     }
 
-    public void updateParcelCode(List<OrderRequest> orderRequestList, String transportationService, String userId) {
+    public void updateParcelCode(List<OrderRequest> orderRequestList, String transportationService, String userId, String uuid) {
         List<UpdateOrderEntity> updateOrderEntityList = new ArrayList<>();
         if (CollectionUtils.isEmpty(orderRequestList)) {
             UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+            updateOrder.setUuid(uuid);
             updateOrder.setStatus("fail");
             updateOrder.setState("Shipping");
+            updateOrder.setCurrent(0);
+            updateOrder.setTotal(0);
             updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
             updateOrder.setCreatedBy(userId);
             updateOrder.setCreatedAt(new Date());
@@ -50,9 +53,10 @@ public class ExcelService {
             return;
         }
         updateOrderRepository.deleteByState("Shipping");
-        int index = 1;
+        int current = 0;
+        int total = orderRequestList.size();
         for (OrderRequest orderRequest : orderRequestList) {
-            log.info("index : {}", index++);
+            log.info("current : {}, total : {}", current++,total);
             try {
                 List<OrderEntity> orderList = orderRepository.findByRecipientName(orderRequest.getRecipientName().trim());
                 if (!CollectionUtils.isEmpty(orderList)) {
@@ -69,8 +73,11 @@ public class ExcelService {
                         }
 
                         UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                        updateOrder.setUuid(uuid);
                         updateOrder.setStatus("fail");
                         updateOrder.setState("Shipping");
+                        updateOrder.setCurrent(current);
+                        updateOrder.setTotal(total);
                         updateOrder.setErrorMessage("ชื่อผู้รับ : "+orderRequest.getRecipientName().trim()+" มีคำสั่งซื้อซ้ำ "+orders.toString());
                         updateOrder.setParcelCode(orderRequest.getParcelCode());
                         updateOrder.setRecipientName(orderRequest.getRecipientName());
@@ -91,8 +98,11 @@ public class ExcelService {
                             orderRepository.save(orderEntity);
 
                             UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                            updateOrder.setUuid(uuid);
                             updateOrder.setStatus("success");
                             updateOrder.setState("Shipping");
+                            updateOrder.setCurrent(current);
+                            updateOrder.setTotal(total);
                             updateOrder.setTotalAmount(orderEntity.getTotalAmount());
                             updateOrder.setParcelCode(orderRequest.getParcelCode());
                             updateOrder.setRecipientName(orderRequest.getRecipientName());
@@ -102,8 +112,11 @@ public class ExcelService {
                             updateOrderEntityList.add(updateOrder);
                         } else {
                             UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                            updateOrder.setUuid(uuid);
                             updateOrder.setStatus("fail");
                             updateOrder.setState("Shipping");
+                            updateOrder.setCurrent(current);
+                            updateOrder.setTotal(total);
                             updateOrder.setErrorMessage("คำสั่งซื้อของชื่อผู้รับนี้อยู่ในสถานะ "+orderEntity.getStatus());
                             updateOrder.setParcelCode(orderRequest.getParcelCode());
                             updateOrder.setRecipientName(orderRequest.getRecipientName());
@@ -115,8 +128,11 @@ public class ExcelService {
                     }
                 } else {
                     UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                    updateOrder.setUuid(uuid);
                     updateOrder.setStatus("fail");
                     updateOrder.setState("Shipping");
+                    updateOrder.setCurrent(current);
+                    updateOrder.setTotal(total);
                     updateOrder.setErrorMessage("ไม่มีชื่อผู้รับในระบบ");
                     updateOrder.setParcelCode(orderRequest.getParcelCode());
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
@@ -127,8 +143,11 @@ public class ExcelService {
                 }
             } catch (Exception e) {
                 UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                updateOrder.setUuid(uuid);
                 updateOrder.setStatus("fail");
                 updateOrder.setState("Shipping");
+                updateOrder.setCurrent(current);
+                updateOrder.setTotal(total);
                 updateOrder.setErrorMessage(e.getMessage());
                 updateOrder.setParcelCode(orderRequest.getParcelCode());
                 updateOrder.setRecipientName(orderRequest.getRecipientName());
@@ -143,18 +162,21 @@ public class ExcelService {
     }
 
     @Async("taskExecutor")
-    public void uploadFileUpdateSuccess(MultipartFile file, String transportationService, String userId) throws IOException {
+    public void uploadFileUpdateSuccess(MultipartFile file, String transportationService, String userId, String uuid) throws IOException {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMapSuccess(file.getInputStream(),transportationService,"Order Template");
         log.info("orderRequestList : {}", orderRequestList.size());
-        updateSuccess(orderRequestList,userId);
+        updateSuccess(orderRequestList,userId,uuid);
     }
 
-    public void updateSuccess(List<OrderRequest> orderRequestList, String userId) {
+    public void updateSuccess(List<OrderRequest> orderRequestList, String userId, String uuid) {
         List<UpdateOrderEntity> updateOrderEntityList = new ArrayList<>();
         if (CollectionUtils.isEmpty(orderRequestList)) {
             UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+            updateOrder.setUuid(uuid);
             updateOrder.setStatus("fail");
             updateOrder.setState("Success");
+            updateOrder.setCurrent(0);
+            updateOrder.setTotal(0);
             updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
             updateOrder.setCreatedBy(userId);
             updateOrder.setCreatedAt(new Date());
@@ -166,9 +188,10 @@ public class ExcelService {
             return;
         }
         updateOrderRepository.deleteByState("Success");
-        int index = 1;
+        int current = 0;
+        int total = orderRequestList.size();
         for (OrderRequest orderRequest : orderRequestList) {
-            log.info("index : {}", index++);
+            log.info("current : {}, total : {}", current++,total);
             try {
                 Optional<OrderEntity> optional = orderRepository.findByParcelCode(orderRequest.getParcelCode().trim());
                 if (optional.isPresent()) {
@@ -180,8 +203,11 @@ public class ExcelService {
                     orderRepository.save(orderEntity);
 
                     UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                    updateOrder.setUuid(uuid);
                     updateOrder.setStatus("success");
                     updateOrder.setState("Success");
+                    updateOrder.setCurrent(current);
+                    updateOrder.setTotal(total);
                     updateOrder.setTotalAmount(orderEntity.getTotalAmount());
                     updateOrder.setParcelCode(orderRequest.getParcelCode());
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
@@ -191,8 +217,11 @@ public class ExcelService {
                     updateOrderEntityList.add(updateOrder);
                 } else {
                     UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                    updateOrder.setUuid(uuid);
                     updateOrder.setStatus("fail");
                     updateOrder.setState("Success");
+                    updateOrder.setCurrent(current);
+                    updateOrder.setTotal(total);
                     updateOrder.setErrorMessage("ไม่มีรหัสพัสดุนี้ในระบบ");
                     updateOrder.setParcelCode(orderRequest.getParcelCode());
                     updateOrder.setRecipientName(orderRequest.getRecipientName());
@@ -203,8 +232,11 @@ public class ExcelService {
                 }
             } catch (Exception e) {
                 UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                updateOrder.setUuid(uuid);
                 updateOrder.setStatus("fail");
                 updateOrder.setState("Success");
+                updateOrder.setCurrent(current);
+                updateOrder.setTotal(total);
                 updateOrder.setErrorMessage(e.getMessage());
                 updateOrder.setParcelCode(orderRequest.getParcelCode());
                 updateOrder.setRecipientName(orderRequest.getRecipientName());

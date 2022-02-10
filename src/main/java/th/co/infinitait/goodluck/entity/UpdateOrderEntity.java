@@ -18,11 +18,20 @@ public class UpdateOrderEntity {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "uuid")
+    private String uuid;
+
     @Column(name = "status")
     private String status;
 
     @Column(name = "state")
     private String state;
+
+    @Column(name = "current")
+    private Integer current;
+
+    @Column(name = "total")
+    private Integer total;
 
     @Column(name = "error_message")
     private String errorMessage;
@@ -35,9 +44,6 @@ public class UpdateOrderEntity {
 
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
-
-    @Column(name = "deleted_at")
-    private Date deletedAt;
 
     @Column(name = "created_at")
     private Date createdAt;

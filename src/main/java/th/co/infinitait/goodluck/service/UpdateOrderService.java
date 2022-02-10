@@ -27,15 +27,18 @@ public class UpdateOrderService {
 
     private final UpdateOrderRepository updateOrderRepository;
 
-    public List<OrderResponse> getUpdateOrder(String state) throws Exception {
+    public List<OrderResponse> getUpdateOrder(String uuid) throws Exception {
         List<OrderResponse> updateOrderEntityList = new ArrayList<>();
-        List<UpdateOrderEntity> updateOrderEntities = updateOrderRepository.findByState(state);
+        List<UpdateOrderEntity> updateOrderEntities = updateOrderRepository.findByUuid(uuid);
         if(!CollectionUtils.isEmpty(updateOrderEntities)){
             for(UpdateOrderEntity updateOrderEntity:updateOrderEntities){
                 OrderResponse orderResponse = new OrderResponse();
                 orderResponse.setId(updateOrderEntity.getId());
+                orderResponse.setUuid(updateOrderEntity.getUuid());
                 orderResponse.setStatus(updateOrderEntity.getStatus());
                 orderResponse.setState(updateOrderEntity.getState());
+                orderResponse.setCurrent(updateOrderEntity.getCurrent());
+                orderResponse.setTotal(updateOrderEntity.getTotal());
                 orderResponse.setErrorMessage(updateOrderEntity.getErrorMessage());
                 orderResponse.setParcelCode(updateOrderEntity.getParcelCode());
                 orderResponse.setRecipientName(updateOrderEntity.getRecipientName());

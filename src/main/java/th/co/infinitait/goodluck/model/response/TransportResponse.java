@@ -18,6 +18,7 @@ public class TransportResponse {
     @Builder.Default
     private Integer total = 0;
     private Integer no;
+    private String customerOrderNumber;
     private String consigneeName;
     private String address1;
     private String address2;

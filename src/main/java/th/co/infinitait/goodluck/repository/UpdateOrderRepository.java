@@ -11,13 +11,13 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-public interface UpdateOrderRepository extends JpaRepository<UpdateOrderEntity, Long> {
+public interface UpdateOrderRepository extends JpaRepository<UpdateOrderEntity, String> {
 
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM tb_update_order WHERE state = :state ", nativeQuery = true)
     int deleteByState(@Param("state") String state);
 
-    List<UpdateOrderEntity> findByState(String state);
+    List<UpdateOrderEntity> findByUuid(String uuid);
 
 }
