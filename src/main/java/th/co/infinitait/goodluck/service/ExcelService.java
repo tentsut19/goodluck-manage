@@ -28,9 +28,9 @@ public class ExcelService {
     private final OrderRepository orderRepository;
     private final UpdateOrderRepository updateOrderRepository;
 
-    @Async
+    @Async("taskExecutor")
     public void uploadFileUpdateParcelCode(MultipartFile file, String transportationService, String userId) throws Exception {
-        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),transportationService,"Order Template");
+        List<OrderRequest> orderRequestList = excelHelperService.excelToMapParcelCode(file.getInputStream(),transportationService,"Order Template");
         log.info("orderRequestList : {}", orderRequestList.size());
         updateParcelCode(orderRequestList,transportationService,userId);
     }
@@ -54,38 +54,61 @@ public class ExcelService {
         updateOrderRepository.deleteByState("Shipping");
         for (OrderRequest orderRequest : orderRequestList) {
             try {
-                Optional<OrderEntity> optional = orderRepository.findByRecipientName(orderRequest.getRecipientName().trim());
-                if (optional.isPresent()) {
-                    OrderEntity orderEntity = optional.get();
-                    if (orderEntity.getStatus().equalsIgnoreCase("Draft") ||
-                            orderEntity.getStatus().equalsIgnoreCase("Shipping")) {
-                        orderEntity.setParcelCode(orderRequest.getParcelCode());
-                        orderEntity.setStatus("Shipping");
-                        orderEntity.setTransportationService(transportationService);
-                        orderEntity.setUpdatedBy(userId);
-                        orderEntity.setUpdatedAt(new Date());
-                        orderEntity.setDeliveryDate(new Date());
-                        orderRepository.save(orderEntity);
+                List<OrderEntity> orderList = orderRepository.findByRecipientName(orderRequest.getRecipientName().trim());
+                if (!CollectionUtils.isEmpty(orderList)) {
+                    if(orderList.size() > 1){
+                        int i = 0;
+                        StringBuilder orders = new StringBuilder();
+                        for(OrderEntity order:orderList){
+                            if(i == 0){
+                                orders = new StringBuilder(order.getCode());
+                            }else{
+                                orders.append(",").append(order.getCode());
+                            }
+                            i++;
+                        }
 
-                        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
-                        updateOrder.setStatus("success");
-                        updateOrder.setState("Shipping");
-                        updateOrder.setTotalAmount(orderEntity.getTotalAmount());
-                        updateOrder.setParcelCode(orderRequest.getParcelCode());
-                        updateOrder.setRecipientName(orderRequest.getRecipientName());
-                        updateOrder.setCreatedBy(userId);
-                        updateOrder.setCreatedAt(new Date());
-                        updateOrderEntityList.add(updateOrder);
-                    } else {
                         UpdateOrderEntity updateOrder = new UpdateOrderEntity();
                         updateOrder.setStatus("fail");
                         updateOrder.setState("Shipping");
-                        updateOrder.setErrorMessage("รายการสินค้าของชื่อผู้รับนี้ไม่อยํ่ในสถานะแบบร่างหรือกำลังจัดส่ง");
+                        updateOrder.setErrorMessage("ชื่อผู้รับ : "+orderRequest.getRecipientName().trim()+" มีคำสั่งซื้อซ้ำ "+orders.toString());
                         updateOrder.setParcelCode(orderRequest.getParcelCode());
                         updateOrder.setRecipientName(orderRequest.getRecipientName());
                         updateOrder.setCreatedBy(userId);
                         updateOrder.setCreatedAt(new Date());
                         updateOrderEntityList.add(updateOrder);
+                    }else{
+                        OrderEntity orderEntity = orderList.get(0);
+                        if (orderEntity.getStatus().equalsIgnoreCase("Draft") ||
+                                orderEntity.getStatus().equalsIgnoreCase("Shipping")) {
+                            orderEntity.setParcelCode(orderRequest.getParcelCode());
+                            orderEntity.setStatus("Shipping");
+                            orderEntity.setTransportationService(transportationService);
+                            orderEntity.setUpdatedBy(userId);
+                            orderEntity.setUpdatedAt(new Date());
+                            orderEntity.setDeliveryDate(new Date());
+                            orderRepository.save(orderEntity);
+
+                            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                            updateOrder.setStatus("success");
+                            updateOrder.setState("Shipping");
+                            updateOrder.setTotalAmount(orderEntity.getTotalAmount());
+                            updateOrder.setParcelCode(orderRequest.getParcelCode());
+                            updateOrder.setRecipientName(orderRequest.getRecipientName());
+                            updateOrder.setCreatedBy(userId);
+                            updateOrder.setCreatedAt(new Date());
+                            updateOrderEntityList.add(updateOrder);
+                        } else {
+                            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+                            updateOrder.setStatus("fail");
+                            updateOrder.setState("Shipping");
+                            updateOrder.setErrorMessage("คำสั่งซื้อของชื่อผู้รับนี้อยู่ในสถานะ "+orderEntity.getStatus());
+                            updateOrder.setParcelCode(orderRequest.getParcelCode());
+                            updateOrder.setRecipientName(orderRequest.getRecipientName());
+                            updateOrder.setCreatedBy(userId);
+                            updateOrder.setCreatedAt(new Date());
+                            updateOrderEntityList.add(updateOrder);
+                        }
                     }
                 } else {
                     UpdateOrderEntity updateOrder = new UpdateOrderEntity();
@@ -115,9 +138,9 @@ public class ExcelService {
         updateOrderRepository.saveAll(updateOrderEntityList);
     }
 
-    @Async
+    @Async("taskExecutor")
     public void uploadFileUpdateSuccess(MultipartFile file, String transportationService, String userId) throws IOException {
-        List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),transportationService,"Order Template");
+        List<OrderRequest> orderRequestList = excelHelperService.excelToMapSuccess(file.getInputStream(),transportationService,"Order Template");
         log.info("orderRequestList : {}", orderRequestList.size());
         updateSuccess(orderRequestList,userId);
     }
@@ -187,7 +210,7 @@ public class ExcelService {
         updateOrderRepository.saveAll(updateOrderEntityList);
     }
 
-    @Async
+    @Async("taskExecutor")
     public void uploadFileUpdateCancel(MultipartFile file, String transportationService, String userId) throws IOException {
         List<OrderRequest> orderRequestList = excelHelperService.excelToMap(file.getInputStream(),transportationService,"Order Template");
         log.info("orderRequestList : {}", orderRequestList.size());

@@ -39,7 +39,8 @@ public class ExcelHelperService {
         try {
             Workbook workbook = new XSSFWorkbook(is);
 
-            Sheet sheet = workbook.getSheet(sheetName);
+//            Sheet sheet = workbook.getSheet(sheetName);
+            Sheet sheet = workbook.getSheetAt(0);
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             Iterator<Row> rows = null;
             try {
@@ -73,6 +74,8 @@ public class ExcelHelperService {
                 CellReference cr = new CellReference("A"); // รหัสพัสดุ
                 if("kerry".equalsIgnoreCase(transportationService)){
                     cr = new CellReference("J"); // รหัสพัสดุ
+                }else if("flash".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("B"); // รหัสพัสดุ
                 }
                 Cell cell = currentRow.getCell(cr.getCol());
                 CellValue cellValue = evaluator.evaluate(cell);
@@ -83,7 +86,12 @@ public class ExcelHelperService {
                     continue;
                 }
 
-                cr = new CellReference("B"); // ชื่อผู้รับ
+                cr = new CellReference("C"); // ชื่อผู้รับ
+                if("kerry".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("C"); // รหัสพัสดุ
+                }else if("flash".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("C"); // รหัสพัสดุ
+                }
                 cell = currentRow.getCell(cr.getCol());
                 cellValue = evaluator.evaluate(cell);
                 String recipientName = getValueString(cellValue);
@@ -100,6 +108,156 @@ public class ExcelHelperService {
         }
     }
 
+    public List<OrderRequest> excelToMapParcelCode(InputStream is, String transportationService, String sheetName) throws IOException {
+        try {
+            Workbook workbook = new XSSFWorkbook(is);
+
+//            Sheet sheet = workbook.getSheet(sheetName);
+            Sheet sheet = workbook.getSheetAt(0);
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            Iterator<Row> rows = null;
+            try {
+                rows = sheet.iterator();
+            }catch (Exception e){
+                throw new InvalidParameterException("sheet name : "+sheetName+" ไม่มีในไฟล์");
+            }
+
+            List<OrderRequest> orderRequestList = new ArrayList<>();
+
+            boolean isHeader = true;
+            int countHeader = 0;
+            while (rows.hasNext()) {
+                Row currentRow = rows.next();
+
+                if("kerry".equalsIgnoreCase(transportationService)) {
+                    if(countHeader < 5){
+                        countHeader++;
+                        continue;
+                    }
+                }else{
+                    // skip header
+                    if (isHeader) {
+                        isHeader = false;
+                        continue;
+                    }
+                }
+
+                OrderRequest orderRequest = new OrderRequest();
+
+                CellReference cr = new CellReference("A"); // รหัสพัสดุ
+                if("kerry".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("J"); // รหัสพัสดุ
+                }else if("flash".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("B"); // รหัสพัสดุ
+                }
+                Cell cell = currentRow.getCell(cr.getCol());
+                CellValue cellValue = evaluator.evaluate(cell);
+                String parcelCode = getValueString(cellValue);
+                orderRequest.setParcelCode(parcelCode);
+
+                if(StringUtils.isEmpty(parcelCode)){
+                    continue;
+                }
+
+                cr = new CellReference("C"); // ชื่อผู้รับ
+                if("kerry".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("C"); // รหัสพัสดุ
+                }else if("flash".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("C"); // รหัสพัสดุ
+                }
+                cell = currentRow.getCell(cr.getCol());
+                cellValue = evaluator.evaluate(cell);
+                String recipientName = getValueString(cellValue);
+                orderRequest.setRecipientName(recipientName);
+
+                orderRequestList.add(orderRequest);
+            }
+
+            workbook.close();
+            return orderRequestList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public List<OrderRequest> excelToMapSuccess(InputStream is, String transportationService, String sheetName) throws IOException {
+        try {
+            Workbook workbook = new XSSFWorkbook(is);
+
+//            Sheet sheet = workbook.getSheet(sheetName);
+            Sheet sheet = workbook.getSheetAt(0);
+            if("kerry".equalsIgnoreCase(transportationService)){
+                sheet = workbook.getSheetAt(0);
+            }else if("flash".equalsIgnoreCase(transportationService)){
+                sheet = workbook.getSheetAt(1);
+            }
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            Iterator<Row> rows = null;
+            try {
+                rows = sheet.iterator();
+            }catch (Exception e){
+                throw new InvalidParameterException("sheet name : "+sheetName+" ไม่มีในไฟล์");
+            }
+
+            List<OrderRequest> orderRequestList = new ArrayList<>();
+
+            boolean isHeader = true;
+            int countHeader = 0;
+            while (rows.hasNext()) {
+                Row currentRow = rows.next();
+
+                if("kerry".equalsIgnoreCase(transportationService)) {
+                    if(countHeader < 5){
+                        countHeader++;
+                        continue;
+                    }
+                }else{
+                    // skip header
+                    if (isHeader) {
+                        isHeader = false;
+                        continue;
+                    }
+                }
+
+                OrderRequest orderRequest = new OrderRequest();
+
+                CellReference cr = new CellReference("C"); // รหัสพัสดุ
+                if("kerry".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("C"); // รหัสพัสดุ
+                }else if("flash".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("C"); // รหัสพัสดุ
+                }
+                Cell cell = currentRow.getCell(cr.getCol());
+                CellValue cellValue = evaluator.evaluate(cell);
+                String parcelCode = getValueString(cellValue);
+                orderRequest.setParcelCode(parcelCode);
+
+                if(StringUtils.isEmpty(parcelCode)){
+                    continue;
+                }
+
+                cr = new CellReference("D"); // ชื่อผู้รับ
+                if("kerry".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("D"); // รหัสพัสดุ
+                }else if("flash".equalsIgnoreCase(transportationService)){
+                    cr = new CellReference("D"); // รหัสพัสดุ
+                }
+                cell = currentRow.getCell(cr.getCol());
+                cellValue = evaluator.evaluate(cell);
+                String recipientName = getValueString(cellValue);
+                orderRequest.setRecipientName(recipientName);
+
+                orderRequestList.add(orderRequest);
+            }
+
+            workbook.close();
+            return orderRequestList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
     public static String getValueString(CellValue cell){
         String result = "";

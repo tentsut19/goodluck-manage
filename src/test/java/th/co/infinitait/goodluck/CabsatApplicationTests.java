@@ -46,6 +46,11 @@ class CabsatApplicationTests {
 		}
 	}
 
+	@Test
+	void test_split_v2() throws ParseException {
+
+	}
+
 	boolean checkTime(LocalDateTime localDateTime) throws ParseException {
 		int h = localDateTime.getHour();
 		System.out.println(h);

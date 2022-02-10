@@ -11,11 +11,11 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     @Query(value = "SELECT * FROM tb_order " +
-            "WHERE recipient_name = :recipientName ", nativeQuery = true)
-    Optional<OrderEntity> findByRecipientName(@Param("recipientName")String recipientName);
+            "WHERE recipient_name = :recipientName AND status != 'Cancel' ", nativeQuery = true)
+    List<OrderEntity> findByRecipientName(@Param("recipientName")String recipientName);
 
     @Query(value = "SELECT * FROM tb_order " +
-            "WHERE parcel_code = :parcelCode ", nativeQuery = true)
+            "WHERE parcel_code = :parcelCode AND status != 'Cancel' ", nativeQuery = true)
     Optional<OrderEntity> findByParcelCode(@Param("parcelCode")String parcelCode);
 
 }
