@@ -65,7 +65,7 @@ public class UploadExcelController {
     }
 
     @PostMapping(value = "/excel/upload/update/success")
-    public ResponseEntity<OrderResponse> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<ReportResponse> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file,
                                                                  @RequestParam("transportationService") String transportationService) {
         log.info("uploadFileUpdateParcelCode transportationService : {}", transportationService);
         String message = "";
@@ -74,7 +74,7 @@ public class UploadExcelController {
                 String uuid = RandomStringUtils.randomAlphanumeric(64);
                 log.info("uploadFileUpdateParcelCode uuid : {}", uuid);
                 fileService.uploadFileUpdateSuccess(file,transportationService,cabsatPayload.getUserId(),uuid);
-                return ResponseEntity.ok(OrderResponse.builder().build());
+                return ResponseEntity.ok(ReportResponse.builder().uuid(uuid).status("SUCCESS").build());
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 throw new NotFoundException(e.getMessage());
