@@ -189,9 +189,9 @@ public class ExcelService {
         try {
             Converter converter = new Converter(file.getInputStream());
             SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
-            converter.convert(pdfFilePath+"/excel/cod-kerry.xlsx", options);
+            converter.convert(pdfFilePath+"/cod-kerry.xlsx", options);
 
-            File fileExcel = new File(pdfFilePath+"/excel/cod-kerry.xlsx");
+            File fileExcel = new File(pdfFilePath+"/cod-kerry.xlsx");
             InputStream targetStream = new FileInputStream(fileExcel);
 
             List<OrderRequest> orderRequestList = excelHelperService.excelToMapSuccess(targetStream,transportationService,"Order Template");
