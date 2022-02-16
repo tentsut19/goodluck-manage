@@ -184,6 +184,28 @@ public class ExcelService {
         log.info("updateOrderEntityList size : {}", updateOrderEntityList.size());
     }
 
+    public void converterPdfToExcel(MultipartFile file, String userId, String uuid) throws IOException {
+        try {
+            log.info("Start converterPdfToExcel uuid : {}", uuid);
+            Converter converter = new Converter(file.getInputStream());
+            SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
+            converter.convert(pdfFilePath + "/cod-kerry.xlsx", options);
+            log.info("End converterPdfToExcel uuid : {}", uuid);
+        } catch (Exception e) {
+            log.error(e.getMessage(),e);
+            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+            updateOrder.setUuid(uuid);
+            updateOrder.setStatus("fail");
+            updateOrder.setState("Shipping");
+            updateOrder.setCurrent(0);
+            updateOrder.setTotal(0);
+            updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
+            updateOrder.setCreatedBy(userId);
+            updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
+        }
+    }
+
     @Async("taskExecutor")
     public void uploadFileUpdateSuccess(MultipartFile file, String transportationService, String userId, String uuid) throws IOException {
         try {

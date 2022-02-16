@@ -71,6 +71,7 @@ public class UploadExcelController {
         try {
             String uuid = RandomStringUtils.randomAlphanumeric(64);
             log.info("uploadFileUpdateParcelCode uuid : {}", uuid);
+            fileService.converterPdfToExcel(file,cabsatPayload.getUserId(),uuid);
             fileService.uploadFileUpdateSuccess(file,transportationService,cabsatPayload.getUserId(),uuid);
             return ResponseEntity.ok(ReportResponse.builder().uuid(uuid).status("SUCCESS").build());
         } catch (Exception e) {
