@@ -181,6 +181,12 @@
 			<artifactId>nimbus-jose-jwt</artifactId>
 			<version>9.1.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.groupdocs</groupId>
+			<artifactId>groupdocs-conversion</artifactId>
+			<version>21.4</version>
+		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>
@@ -245,5 +251,13 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>GroupDocsJavaAPI</id>
+			<name>GroupDocs Java API</name>
+			<url>http://repository.groupdocs.com/repo/</url>
+		</repository>
+	</repositories>
 
 </project>

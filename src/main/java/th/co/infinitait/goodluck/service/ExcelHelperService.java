@@ -224,7 +224,7 @@ public class ExcelHelperService {
 
                 CellReference cr = new CellReference("C"); // รหัสพัสดุ
                 if("kerry".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("C"); // รหัสพัสดุ
+                    cr = new CellReference("A"); // รหัสพัสดุ
                 }else if("flash".equalsIgnoreCase(transportationService)){
                     cr = new CellReference("C"); // รหัสพัสดุ
                 }
@@ -239,7 +239,7 @@ public class ExcelHelperService {
 
                 cr = new CellReference("D"); // ชื่อผู้รับ
                 if("kerry".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("D"); // รหัสพัสดุ
+                    cr = new CellReference("B"); // รหัสพัสดุ
                 }else if("flash".equalsIgnoreCase(transportationService)){
                     cr = new CellReference("D"); // รหัสพัสดุ
                 }

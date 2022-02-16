@@ -1,5 +1,7 @@
 package th.co.infinitait.goodluck.service;
 
+import com.groupdocs.conversion.Converter;
+import com.groupdocs.conversion.options.convert.SpreadsheetConvertOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -13,7 +15,10 @@ import th.co.infinitait.goodluck.model.request.OrderRequest;
 import th.co.infinitait.goodluck.model.response.OrderResponse;
 import th.co.infinitait.goodluck.repository.*;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,9 +35,23 @@ public class ExcelService {
 
     @Async("taskExecutor")
     public void uploadFileUpdateParcelCode(MultipartFile file, String transportationService, String userId, String uuid) throws Exception {
-        List<OrderRequest> orderRequestList = excelHelperService.excelToMapParcelCode(file.getInputStream(),transportationService,"Order Template");
-        log.info("orderRequestList : {}", orderRequestList.size());
-        updateParcelCode(orderRequestList,transportationService,userId,uuid);
+        try {
+            List<OrderRequest> orderRequestList = excelHelperService.excelToMapParcelCode(file.getInputStream(),transportationService,"Order Template");
+            log.info("orderRequestList : {}", orderRequestList.size());
+            updateParcelCode(orderRequestList,transportationService,userId,uuid);
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
+            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+            updateOrder.setUuid(uuid);
+            updateOrder.setStatus("fail");
+            updateOrder.setState("Shipping");
+            updateOrder.setCurrent(0);
+            updateOrder.setTotal(0);
+            updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
+            updateOrder.setCreatedBy(userId);
+            updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
+        }
     }
 
     public void updateParcelCode(List<OrderRequest> orderRequestList, String transportationService, String userId, String uuid) {
@@ -163,9 +182,30 @@ public class ExcelService {
 
     @Async("taskExecutor")
     public void uploadFileUpdateSuccess(MultipartFile file, String transportationService, String userId, String uuid) throws IOException {
-        List<OrderRequest> orderRequestList = excelHelperService.excelToMapSuccess(file.getInputStream(),transportationService,"Order Template");
-        log.info("orderRequestList : {}", orderRequestList.size());
-        updateSuccess(orderRequestList,userId,uuid);
+        try {
+            Converter converter = new Converter(file.getInputStream());
+            SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
+            converter.convert("report/excel/cod-kerry.xlsx", options);
+
+            File fileExcel = new File("report/excel/cod-kerry.xlsx");
+            InputStream targetStream = new FileInputStream(fileExcel);
+
+            List<OrderRequest> orderRequestList = excelHelperService.excelToMapSuccess(targetStream,transportationService,"Order Template");
+            log.info("orderRequestList : {}", orderRequestList.size());
+            updateSuccess(orderRequestList,userId,uuid);
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
+            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+            updateOrder.setUuid(uuid);
+            updateOrder.setStatus("fail");
+            updateOrder.setState("Shipping");
+            updateOrder.setCurrent(0);
+            updateOrder.setTotal(0);
+            updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
+            updateOrder.setCreatedBy(userId);
+            updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
+        }
     }
 
     public void updateSuccess(List<OrderRequest> orderRequestList, String userId, String uuid) {

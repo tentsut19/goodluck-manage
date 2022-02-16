@@ -1,5 +1,7 @@
 package th.co.infinitait.goodluck.controller;
 
+import com.groupdocs.conversion.Converter;
+import com.groupdocs.conversion.options.convert.SpreadsheetConvertOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -82,5 +84,13 @@ public class ReportController {
                 // Tell browser to display PDF if it can
                 .header("Content-Disposition", "inline; filename=\""+fileName+"\"")
                 .body(fileContent);
+    }
+
+    @GetMapping(value = "/convert-pdf-to-excel", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenTransportResponse> convertPdfToExcel() throws Exception {
+        Converter converter = new Converter("report/pdf/cod-kerry.pdf");
+        SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
+        converter.convert("report/excel/cod-kerry.xlsx", options);
+        return ResponseEntity.ok(GenTransportResponse.builder().build());
     }
 }
