@@ -4,6 +4,7 @@ import com.groupdocs.conversion.Converter;
 import com.groupdocs.conversion.options.convert.SpreadsheetConvertOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -32,6 +33,9 @@ public class ExcelService {
     private final ExcelHelperService excelHelperService;
     private final OrderRepository orderRepository;
     private final UpdateOrderRepository updateOrderRepository;
+
+    @Value("${report-generate-path}")
+    private String pdfFilePath;
 
     @Async("taskExecutor")
     public void uploadFileUpdateParcelCode(MultipartFile file, String transportationService, String userId, String uuid) throws Exception {
@@ -185,9 +189,9 @@ public class ExcelService {
         try {
             Converter converter = new Converter(file.getInputStream());
             SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
-            converter.convert("report/excel/cod-kerry.xlsx", options);
+            converter.convert(pdfFilePath+"/excel/cod-kerry.xlsx", options);
 
-            File fileExcel = new File("report/excel/cod-kerry.xlsx");
+            File fileExcel = new File(pdfFilePath+"/excel/cod-kerry.xlsx");
             InputStream targetStream = new FileInputStream(fileExcel);
 
             List<OrderRequest> orderRequestList = excelHelperService.excelToMapSuccess(targetStream,transportationService,"Order Template");

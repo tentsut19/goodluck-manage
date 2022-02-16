@@ -18,7 +18,7 @@ report-location: classpath:reports
 storage-location: classpath:/reports
 #report-location: ${user.home}/Project/cabsat/api/cabsat_api/reports
 #storage-location: file:${user.home}/Project/cabsat/api/cabsat_api/src/main/resources/reports
-report-generate-path: ${user.home}/temp/pdf
+report-generate-path: ${user.home}/report
 
 server:
   port: ${PORT:8092}
