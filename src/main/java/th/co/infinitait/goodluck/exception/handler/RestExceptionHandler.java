@@ -199,14 +199,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, error, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(NestedServletException.class)
-    public ResponseEntity handleNestedServletException(NestedServletException ex, final WebRequest request) {
-        log.warn("BAD_REQUEST: {}", ex.getMessage());
-        Error error = createErrorResponse("BAD_REQUEST", ex.getMessage(), MessageLevel.WARNING);
-        String traceId = MDC.get("X-B3-TraceId");
-        saveLogError(traceId,ex.getMessage(),ex.getCause() == null ? "" : ex.getCause().toString());
-        return handleExceptionInternal(ex, error, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-    }
+//    @ExceptionHandler(NestedServletException.class)
+//    public ResponseEntity handleNestedServletException(NestedServletException ex, final WebRequest request) {
+//        log.warn("BAD_REQUEST: {}", ex.getMessage());
+//        Error error = createErrorResponse("BAD_REQUEST", ex.getMessage(), MessageLevel.WARNING);
+//        String traceId = MDC.get("X-B3-TraceId");
+//        saveLogError(traceId,ex.getMessage(),ex.getCause() == null ? "" : ex.getCause().toString());
+//        return handleExceptionInternal(ex, error, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+//    }
 
     private String createMessage(String message) {
         return String.format("%s", message);

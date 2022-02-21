@@ -21,7 +21,7 @@ storage-location: classpath:/reports
 report-generate-path: ${user.home}
 
 server:
-  port: ${PORT:8092}
+  port: ${PORT:8091}
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -40,11 +40,11 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://localhost:3306/goodluck_db
-    url: jdbc:mariadb://comvisitor.cvysc3moexiz.ap-southeast-1.rds.amazonaws.com/goodluck_db
+    url: jdbc:mariadb://localhost:3306/goodluck_db
+#    url: jdbc:mariadb://comvisitor.cvysc3moexiz.ap-southeast-1.rds.amazonaws.com/goodluck_db
     username: root
-#    password: root
-    password: comvisitor1234
+    password: root
+#    password: comvisitor1234
     hikari:
       maximum-pool-size: 5
       connection-timeout: 180000
@@ -83,7 +83,7 @@ file:
 
 
 logging:
-  file: 'docker-elk/logs/cabsat.log'
+  file: 'logs/goodluck.log'
   pattern:
 #    console: '%d{ISO8601} | %highlight(%-5level) | %t | %cyan(%class{0}) | %M | %L | %m%n'
 #    file: '%d{ISO8601} | %highlight(%-5level) | %t | %cyan(%class{0}) | %M | %L | %m%n'

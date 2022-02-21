@@ -2,28 +2,26 @@ package th.co.infinitait.goodluck.service;
 
 import com.groupdocs.conversion.Converter;
 import com.groupdocs.conversion.options.convert.SpreadsheetConvertOptions;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import th.co.infinitait.goodluck.client.CabsatClient;
 import th.co.infinitait.goodluck.component.CabsatPayload;
 import th.co.infinitait.goodluck.entity.*;
 import th.co.infinitait.goodluck.model.request.OrderRequest;
 import th.co.infinitait.goodluck.model.response.OrderResponse;
 import th.co.infinitait.goodluck.repository.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -33,9 +31,23 @@ public class ExcelService {
     private final ExcelHelperService excelHelperService;
     private final OrderRepository orderRepository;
     private final UpdateOrderRepository updateOrderRepository;
+    private final CabsatClient cabsatClient;
 
     @Value("${report-generate-path}")
     private String pdfFilePath;
+
+    public void createUpdateOrder(String userId, String uuid) {
+        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+        updateOrder.setUuid(uuid);
+        updateOrder.setStatus("start");
+        updateOrder.setState("Shipping");
+        updateOrder.setCurrent(0);
+        updateOrder.setTotal(1);
+        updateOrder.setErrorMessage("เริ่มการอัพเดทข้อมูล");
+        updateOrder.setCreatedBy(userId);
+        updateOrder.setCreatedAt(new Date());
+        updateOrderRepository.save(updateOrder);
+    }
 
     @Async("taskExecutor")
     public void uploadFileUpdateParcelCode(MultipartFile file, String transportationService, String userId, String uuid) throws Exception {
@@ -187,16 +199,43 @@ public class ExcelService {
     public void converterPdfToExcel(MultipartFile file, String userId, String uuid) throws IOException {
         try {
             log.info("Start converterPdfToExcel uuid : {}", uuid);
-            Converter converter = new Converter(file.getInputStream());
-            SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
-            converter.convert(pdfFilePath + "/cod-kerry.xlsx", options);
+            PdfReader pdfReader = new PdfReader(file.getInputStream());
+            int pages = pdfReader.getNumberOfPages();
+            FileWriter csvWriter = new FileWriter(pdfFilePath+"/cod-kerry.csv");
+            for (int i = 1; i <= pages; i++) {
+                String content = PdfTextExtractor.getTextFromPage(pdfReader,i);
+                String[] splitContents = content.split("\n");
+                boolean isTitle = true;
+                for (int j = 0; j < splitContents.length; j++) {
+                    if (isTitle) {
+                        isTitle = false;
+                        continue;
+                    }
+                    csvWriter.append(splitContents[j].replaceAll(" ", ","));
+                    csvWriter.append("\n");
+                }
+            }
+            csvWriter.flush();
+            csvWriter.close();
+
+            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+            updateOrder.setUuid(uuid);
+            updateOrder.setStatus("start");
+            updateOrder.setState("Success");
+            updateOrder.setCurrent(0);
+            updateOrder.setTotal(1);
+            updateOrder.setErrorMessage("เริ่มการอัพเดทข้อมูล");
+            updateOrder.setCreatedBy(userId);
+            updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
             log.info("End converterPdfToExcel uuid : {}", uuid);
         } catch (Exception e) {
+            log.error("=== Exception ===");
             log.error(e.getMessage(),e);
             UpdateOrderEntity updateOrder = new UpdateOrderEntity();
             updateOrder.setUuid(uuid);
             updateOrder.setStatus("fail");
-            updateOrder.setState("Shipping");
+            updateOrder.setState("Success");
             updateOrder.setCurrent(0);
             updateOrder.setTotal(0);
             updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
@@ -206,17 +245,58 @@ public class ExcelService {
         }
     }
 
+    private List<OrderRequest> getRecordCsv() throws Exception {
+        List<OrderRequest> orderRequestList = new ArrayList<>();
+        List<List<String>> records = new ArrayList<>();
+        try (Scanner scanner = new Scanner(new File(pdfFilePath+"/cod-kerry.csv"));) {
+            while (scanner.hasNextLine()) {
+                records.add(getRecordFromLine(scanner.nextLine()));
+            }
+        }
+        log.info("records : {}", records);
+        if(!CollectionUtils.isEmpty(records)){
+            for(List<String> record:records){
+                if(CollectionUtils.isEmpty(record)){
+                    continue;
+                }
+                int index = 0;
+                OrderRequest orderRequest = new OrderRequest();
+                for(String text:record){
+                    log.info("text : {}", text);
+                    if(text.contains("KEX")){
+                        log.info("code : {}", text);
+                        orderRequest = new OrderRequest();
+                        orderRequest.setParcelCode(text);
+                        orderRequest.setRecipientName(record.get(index+3));
+                        orderRequestList.add(orderRequest);
+                    }
+                    index++;
+                }
+            }
+        }
+        return orderRequestList;
+    }
+
+    private List<String> getRecordFromLine(String line) {
+        List<String> values = new ArrayList<>();
+        try (Scanner rowScanner = new Scanner(line)) {
+            rowScanner.useDelimiter(",");
+            while (rowScanner.hasNext()) {
+                values.add(rowScanner.next());
+            }
+        }
+        return values;
+    }
+
     @Async("taskExecutor")
     public void uploadFileUpdateSuccess(MultipartFile file, String transportationService, String userId, String uuid) throws IOException {
         try {
-//            Converter converter = new Converter(file.getInputStream());
-//            SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
-//            converter.convert(pdfFilePath+"/cod-kerry.xlsx", options);
-
-            File fileExcel = new File(pdfFilePath+"/cod-kerry.xlsx");
-            InputStream targetStream = new FileInputStream(fileExcel);
-
-            List<OrderRequest> orderRequestList = excelHelperService.excelToMapSuccess(targetStream,transportationService,"Order Template");
+            List<OrderRequest> orderRequestList = new ArrayList<>();
+            if("kerry".equalsIgnoreCase(transportationService)){
+                orderRequestList = getRecordCsv();
+            }else if("flash".equalsIgnoreCase(transportationService)){
+                orderRequestList = excelHelperService.excelToMapSuccess(file.getInputStream(),transportationService,"Order Template");
+            }
             log.info("orderRequestList : {}", orderRequestList.size());
             updateSuccess(orderRequestList,userId,uuid);
         }catch (Exception e){
@@ -224,7 +304,7 @@ public class ExcelService {
             UpdateOrderEntity updateOrder = new UpdateOrderEntity();
             updateOrder.setUuid(uuid);
             updateOrder.setStatus("fail");
-            updateOrder.setState("Shipping");
+            updateOrder.setState("Success");
             updateOrder.setCurrent(0);
             updateOrder.setTotal(0);
             updateOrder.setErrorMessage("ไฟล์เกิดข้อผิดพลาด");
@@ -276,7 +356,7 @@ public class ExcelService {
                     updateOrder.setTotal(total);
                     updateOrder.setTotalAmount(orderEntity.getTotalAmount());
                     updateOrder.setParcelCode(orderRequest.getParcelCode());
-                    updateOrder.setRecipientName(orderRequest.getRecipientName());
+                    updateOrder.setRecipientName(orderEntity.getRecipientName());
                     updateOrder.setCreatedBy(userId);
                     updateOrder.setCreatedAt(new Date());
                     updateOrderRepository.save(updateOrder);

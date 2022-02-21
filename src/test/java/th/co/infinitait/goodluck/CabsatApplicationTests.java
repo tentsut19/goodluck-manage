@@ -167,5 +167,16 @@ class CabsatApplicationTests {
 		System.out.println("privateVatBigDecimal : "+privateVatBigDecimal);
 	}
 
+	@Test
+	void test_contains() throws Exception {
+		String text = "KEX20485377050";
+		if(text.contains("KEX")){
+			System.out.println("text : "+text);
+		}else{
+			System.out.println("else");
+		}
+	}
+
+
 
 }

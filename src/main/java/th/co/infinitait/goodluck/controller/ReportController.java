@@ -2,13 +2,18 @@ package th.co.infinitait.goodluck.controller;
 
 import com.groupdocs.conversion.Converter;
 import com.groupdocs.conversion.options.convert.SpreadsheetConvertOptions;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.pdfbox.cos.COSDocument;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import th.co.infinitait.goodluck.model.request.OrderRequest;
 import th.co.infinitait.goodluck.model.request.ReportRequest;
 import th.co.infinitait.goodluck.model.request.TransportRequest;
 import th.co.infinitait.goodluck.model.response.GenTransportResponse;
@@ -17,11 +22,12 @@ import th.co.infinitait.goodluck.model.response.ReportResponse;
 import th.co.infinitait.goodluck.service.JasperReportsService;
 
 import javax.validation.Valid;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 @RestController
 @RequestMapping("/api/v1/report/")
@@ -88,9 +94,91 @@ public class ReportController {
 
     @GetMapping(value = "/convert-pdf-to-excel", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenTransportResponse> convertPdfToExcel() throws Exception {
-        Converter converter = new Converter("report/pdf/cod-kerry.pdf");
-        SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
-        converter.convert("report/excel/cod-kerry.xlsx", options);
+//        Converter converter = new Converter("report/pdf/cod-kerry.pdf");
+//        SpreadsheetConvertOptions options = new SpreadsheetConvertOptions();
+//        converter.convert("report/excel/cod-kerry.xlsx", options);
+
+//        File f = new File("report/pdf/cod-kerry.pdf");
+//        String parsedText;
+//        PDFParser parser = new PDFParser(new RandomAccessFile(f, "r"));
+//        parser.parse();
+//
+//        COSDocument cosDoc = parser.getDocument();
+//        PDFTextStripper pdfStripper = new PDFTextStripper();
+//        PDDocument pdDoc = new PDDocument(cosDoc);
+//        parsedText = pdfStripper.getText(pdDoc);
+//
+//        PrintWriter pw = new PrintWriter("report/excel/pdf.txt");
+//        pw.print(parsedText);
+//        pw.close();
+
+        PdfReader pdfReader = new PdfReader("report/pdf/cod-kerry.pdf");
+
+        int pages = pdfReader.getNumberOfPages();
+
+        FileWriter csvWriter = new FileWriter("report/excel/cod-kerry.csv");
+
+        for (int i = 1; i <= pages; i++) {
+            String content = PdfTextExtractor.getTextFromPage(pdfReader,i);
+
+            String[] splitContents = content.split("\n");
+
+            boolean isTitle = true;
+
+            for (int j = 0; j < splitContents.length; j++) {
+                if (isTitle) {
+                    isTitle = false;
+                    continue;
+                }
+
+                csvWriter.append(splitContents[j].replaceAll(" ", ","));
+                csvWriter.append("\n");
+            }
+        }
+
+        csvWriter.flush();
+        csvWriter.close();
+
+        List<List<String>> records = new ArrayList<>();
+        try (Scanner scanner = new Scanner(new File("report/excel/cod-kerry.csv"));) {
+            while (scanner.hasNextLine()) {
+                records.add(getRecordFromLine(scanner.nextLine()));
+            }
+        }
+        log.info("records : {}", records);
+        List<OrderRequest> orderRequestList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(records)){
+            for(List<String> record:records){
+                if(CollectionUtils.isEmpty(record)){
+                    continue;
+                }
+                int index = 0;
+                OrderRequest orderRequest = new OrderRequest();
+                for(String text:record){
+                    log.info("text : {}", text);
+                    if(text.contains("KEX")){
+                        log.info("code : {}", text);
+                        orderRequest = new OrderRequest();
+                        orderRequest.setParcelCode(text);
+                        orderRequest.setRecipientName(record.get(index+3));
+                        orderRequestList.add(orderRequest);
+                    }
+                    index++;
+                }
+            }
+        }
+        log.info("orderRequestList : {}", orderRequestList);
         return ResponseEntity.ok(GenTransportResponse.builder().build());
+    }
+
+    private List<String> getRecordFromLine(String line) {
+        List<String> values = new ArrayList<String>();
+        try (Scanner rowScanner = new Scanner(line)) {
+            rowScanner.useDelimiter(",");
+            while (rowScanner.hasNext()) {
+                values.add(rowScanner.next());
+            }
+        }
+        return values;
     }
 }
