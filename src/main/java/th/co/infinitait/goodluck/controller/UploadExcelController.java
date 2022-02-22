@@ -8,14 +8,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import th.co.infinitait.goodluck.component.CabsatPayload;
+import th.co.infinitait.goodluck.entity.UpdateOrderEntity;
 import th.co.infinitait.goodluck.exception.NotFoundException;
 import th.co.infinitait.goodluck.model.request.OrderRequest;
 import th.co.infinitait.goodluck.model.response.OrderResponse;
 import th.co.infinitait.goodluck.model.response.ReportResponse;
+import th.co.infinitait.goodluck.repository.UpdateOrderRepository;
 import th.co.infinitait.goodluck.service.ExcelHelperService;
 import th.co.infinitait.goodluck.service.ExcelService;
 import th.co.infinitait.goodluck.service.UpdateOrderService;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -28,6 +31,7 @@ public class UploadExcelController {
     private final ExcelService fileService;
     private final UpdateOrderService updateOrderService;
     private final CabsatPayload cabsatPayload;
+    private final UpdateOrderRepository updateOrderRepository;
     private final ExcelHelperService excelHelperService;
 
     @GetMapping(value = "/update-order/uuid/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -72,7 +76,22 @@ public class UploadExcelController {
         try {
             String uuid = RandomStringUtils.randomAlphanumeric(64);
             log.info("uploadFileUpdateParcelCode uuid : {}", uuid);
-            fileService.converterPdfToExcel(file,cabsatPayload.getUserId(),uuid);
+
+            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+            updateOrder.setUuid(uuid);
+            updateOrder.setStatus("start");
+            updateOrder.setState("Success");
+            updateOrder.setCurrent(0);
+            updateOrder.setTotal(1);
+            updateOrder.setErrorMessage("เริ่มการอัพเดทข้อมูล");
+            updateOrder.setCreatedBy(cabsatPayload.getUserId());
+            updateOrder.setCreatedAt(new Date());
+            updateOrderRepository.save(updateOrder);
+
+            if("kerry".equalsIgnoreCase(transportationService)){
+                fileService.converterPdfToExcel(file,cabsatPayload.getUserId(),uuid);
+            }
+
             fileService.uploadFileUpdateSuccess(file,transportationService,cabsatPayload.getUserId(),uuid);
             return ResponseEntity.ok(ReportResponse.builder().uuid(uuid).status("SUCCESS").build());
         } catch (Exception e) {

@@ -218,16 +218,6 @@ public class ExcelService {
             csvWriter.flush();
             csvWriter.close();
 
-            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
-            updateOrder.setUuid(uuid);
-            updateOrder.setStatus("start");
-            updateOrder.setState("Success");
-            updateOrder.setCurrent(0);
-            updateOrder.setTotal(1);
-            updateOrder.setErrorMessage("เริ่มการอัพเดทข้อมูล");
-            updateOrder.setCreatedBy(userId);
-            updateOrder.setCreatedAt(new Date());
-            updateOrderRepository.save(updateOrder);
             log.info("End converterPdfToExcel uuid : {}", uuid);
         } catch (Exception e) {
             log.error("=== Exception ===");
@@ -262,9 +252,7 @@ public class ExcelService {
                 int index = 0;
                 OrderRequest orderRequest = new OrderRequest();
                 for(String text:record){
-                    log.info("text : {}", text);
                     if(text.contains("KEX")){
-                        log.info("code : {}", text);
                         orderRequest = new OrderRequest();
                         orderRequest.setParcelCode(text);
                         orderRequest.setRecipientName(record.get(index+3));
