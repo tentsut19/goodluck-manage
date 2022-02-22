@@ -92,8 +92,12 @@ public class ExcelService {
         int total = orderRequestList.size();
         for (OrderRequest orderRequest : orderRequestList) {
             log.info("current : {}, total : {}", current++,total);
+
+            String s = "17962. มณี\u200B  ธน\u200Bมโน\u200Bสุข";
+            String s1 = "17962. มณี ธนมโนสุข";
+
             try {
-                List<OrderEntity> orderList = orderRepository.findByRecipientName(orderRequest.getRecipientName().trim());
+                List<OrderEntity> orderList = orderRepository.findByRecipientNameIgnoreSpace(orderRequest.getRecipientName().trim());
                 if (!CollectionUtils.isEmpty(orderList)) {
                     if(orderList.size() > 1){
                         int i = 0;
