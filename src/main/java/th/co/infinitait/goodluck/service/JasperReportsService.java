@@ -328,6 +328,13 @@ public class JasperReportsService {
 									transportResponse.setAddress2("แขวง" + address1[1]);
 								}
 							}
+							if(StringUtils.isEmpty(transportResponse.getAddress1())){
+								address1 = address.split("ตำบล");
+								if (address1.length == 2) {
+									transportResponse.setAddress1(address1[0]);
+									transportResponse.setAddress2("ตำบล" + address1[1]);
+								}
+							}
 							transportResponse.setProduct(orderEntity.getProductDraftName()+" "+orderEntity.getQuantity());
 						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
 							if("cod".equalsIgnoreCase(orderEntity.getPaymentChannel())) {

@@ -34,6 +34,26 @@ public class UploadExcelController {
     private final UpdateOrderRepository updateOrderRepository;
     private final ExcelHelperService excelHelperService;
 
+    @GetMapping(value = "/get-order-uuid", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ReportResponse> getOrderUUID() throws Exception {
+        String uuid = RandomStringUtils.randomAlphanumeric(64);
+        log.info("uploadFileUpdateParcelCode uuid : {}", uuid);
+
+        UpdateOrderEntity updateOrder = new UpdateOrderEntity();
+        updateOrder.setUuid(uuid);
+        updateOrder.setStatus("start");
+        updateOrder.setState("");
+        updateOrder.setCurrent(0);
+        updateOrder.setTotal(1);
+        updateOrder.setErrorMessage("เริ่มการอัพเดทข้อมูล");
+//        updateOrder.setCreatedBy(cabsatPayload.getUserId());
+        updateOrder.setCreatedBy("test");
+        updateOrder.setCreatedAt(new Date());
+        updateOrderRepository.save(updateOrder);
+
+        return ResponseEntity.ok(ReportResponse.builder().uuid(uuid).status("SUCCESS").build());
+    }
+
     @GetMapping(value = "/update-order/uuid/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<OrderResponse>> getUpdateOrder(@PathVariable String uuid) throws Exception {
         log.info("uuid : {}", uuid);
@@ -49,44 +69,28 @@ public class UploadExcelController {
 
     @PostMapping(value = "/excel/upload/update/parcel-code")
     public ResponseEntity<ReportResponse> uploadFileUpdateParcelCode(@RequestParam("file") MultipartFile file,
-                                                                    @RequestParam("transportationService") String transportationService
+                                                                     @RequestParam("transportationService") String transportationService,
+                                                                     @RequestParam("uuid") String uuid
                                                                     ) {
-        log.info("uploadFileUpdateParcelCode transportationService : {}", transportationService);
-        String message = "";
-        if (excelHelperService.hasExcelFormat(file)) {
-            try {
-                String uuid = RandomStringUtils.randomAlphanumeric(64);
-                log.info("uploadFileUpdateParcelCode uuid : {}", uuid);
-                fileService.createUpdateOrder(cabsatPayload.getUserId(),uuid);
-                fileService.uploadFileUpdateParcelCode(file,transportationService,cabsatPayload.getUserId(),uuid);
-                return ResponseEntity.ok(ReportResponse.builder().uuid(uuid).status("SUCCESS").build());
-            } catch (Exception e) {
-                log.error(e.getMessage(),e);
-                throw new NotFoundException(e.getMessage());
-            }
+        try {
+            log.info("uploadFileUpdateParcelCode transportationService : {}", transportationService);
+            log.info("uploadFileUpdateParcelCode uuid : {}", uuid);
+
+            fileService.uploadFileUpdateParcelCode(file,transportationService,cabsatPayload.getUserId(),uuid);
+            return ResponseEntity.ok(ReportResponse.builder().uuid(uuid).status("SUCCESS").build());
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
+            throw new NotFoundException(e.getMessage());
         }
-        message = "Please upload an excel file!!";
-        throw new NotFoundException(message);
     }
 
     @PostMapping(value = "/excel/upload/update/success")
     public ResponseEntity<ReportResponse> uploadFileUpdateSuccess(@RequestParam("file") MultipartFile file,
-                                                                 @RequestParam("transportationService") String transportationService) {
-        log.info("uploadFileUpdateSuccess transportationService : {}", transportationService);
+                                                                  @RequestParam("transportationService") String transportationService,
+                                                                  @RequestParam("uuid") String uuid) {
         try {
-            String uuid = RandomStringUtils.randomAlphanumeric(64);
+            log.info("uploadFileUpdateSuccess transportationService : {}", transportationService);
             log.info("uploadFileUpdateParcelCode uuid : {}", uuid);
-
-            UpdateOrderEntity updateOrder = new UpdateOrderEntity();
-            updateOrder.setUuid(uuid);
-            updateOrder.setStatus("start");
-            updateOrder.setState("Success");
-            updateOrder.setCurrent(0);
-            updateOrder.setTotal(1);
-            updateOrder.setErrorMessage("เริ่มการอัพเดทข้อมูล");
-            updateOrder.setCreatedBy(cabsatPayload.getUserId());
-            updateOrder.setCreatedAt(new Date());
-            updateOrderRepository.save(updateOrder);
 
             if("kerry".equalsIgnoreCase(transportationService)){
                 fileService.converterPdfToExcel(file,cabsatPayload.getUserId(),uuid);

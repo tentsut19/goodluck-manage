@@ -49,9 +49,10 @@ public class ExcelService {
         updateOrderRepository.save(updateOrder);
     }
 
-    @Async("taskExecutor")
+//    @Async("taskExecutor")
     public void uploadFileUpdateParcelCode(MultipartFile file, String transportationService, String userId, String uuid) throws Exception {
         try {
+            log.info("uploadFileUpdateParcelCode file : {}", file);
             List<OrderRequest> orderRequestList = excelHelperService.excelToMapParcelCode(file.getInputStream(),transportationService,"Order Template");
             log.info("orderRequestList : {}", orderRequestList.size());
             updateParcelCode(orderRequestList,transportationService,userId,uuid);
@@ -203,6 +204,7 @@ public class ExcelService {
     public void converterPdfToExcel(MultipartFile file, String userId, String uuid) throws IOException {
         try {
             log.info("Start converterPdfToExcel uuid : {}", uuid);
+            log.info("converterPdfToExcel file : {}", file);
             PdfReader pdfReader = new PdfReader(file.getInputStream());
             int pages = pdfReader.getNumberOfPages();
             FileWriter csvWriter = new FileWriter(pdfFilePath+"/cod-kerry.csv");
@@ -280,9 +282,10 @@ public class ExcelService {
         return values;
     }
 
-    @Async("taskExecutor")
+//    @Async("taskExecutor")
     public void uploadFileUpdateSuccess(MultipartFile file, String transportationService, String userId, String uuid) throws IOException {
         try {
+            log.info("uploadFileUpdateSuccess file : {}", file);
             List<OrderRequest> orderRequestList = new ArrayList<>();
             if("kerry".equalsIgnoreCase(transportationService)){
                 orderRequestList = getRecordCsv();

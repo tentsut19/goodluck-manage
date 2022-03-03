@@ -129,24 +129,29 @@ public class ExcelHelperService {
             while (rows.hasNext()) {
                 Row currentRow = rows.next();
 
-                if("kerry".equalsIgnoreCase(transportationService)) {
-                    if(countHeader < 5){
-                        countHeader++;
-                        continue;
-                    }
-                }else{
-                    // skip header
-                    if (isHeader) {
-                        isHeader = false;
-                        continue;
-                    }
+//                if("kerry".equalsIgnoreCase(transportationService)) {
+//                    if(countHeader < 5){
+//                        countHeader++;
+//                        continue;
+//                    }
+//                }else{
+//                    // skip header
+//                    if (isHeader) {
+//                        isHeader = false;
+//                        continue;
+//                    }
+//                }
+                // skip header
+                if (isHeader) {
+                    isHeader = false;
+                    continue;
                 }
 
                 OrderRequest orderRequest = new OrderRequest();
 
                 CellReference cr = new CellReference("A"); // รหัสพัสดุ
                 if("kerry".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("J"); // รหัสพัสดุ
+                    cr = new CellReference("A"); // รหัสพัสดุ
                 }else if("flash".equalsIgnoreCase(transportationService)){
                     cr = new CellReference("B"); // รหัสพัสดุ
                 }
@@ -161,7 +166,7 @@ public class ExcelHelperService {
 
                 cr = new CellReference("C"); // ชื่อผู้รับ
                 if("kerry".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("C"); // รหัสพัสดุ
+                    cr = new CellReference("B"); // รหัสพัสดุ
                 }else if("flash".equalsIgnoreCase(transportationService)){
                     cr = new CellReference("C"); // รหัสพัสดุ
                 }
