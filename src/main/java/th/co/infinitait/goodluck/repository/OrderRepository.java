@@ -15,8 +15,8 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     List<OrderEntity> findByRecipientName(@Param("recipientName")String recipientName);
 
     @Query(value = "SELECT * FROM tb_order " +
-            "WHERE REPLACE(REPLACE(recipient_name, ' ', ''), '\u200B', '') " +
-            "= REPLACE(REPLACE(:recipientName, ' ', ''), '\u200B', '') " +
+            "WHERE REPLACE(REPLACE(REPLACE(recipient_name, ' ', ''), '\u200B', ''), \"?\", '') " +
+            "= REPLACE(REPLACE(REPLACE(:recipientName, ' ', ''), '\u200B', ''), \"?\", '') " +
             "AND status != 'Cancel' AND deleted_at is null ", nativeQuery = true)
     List<OrderEntity> findByRecipientNameIgnoreSpace(@Param("recipientName")String recipientName);
 

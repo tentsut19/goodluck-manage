@@ -96,6 +96,7 @@ public class ExcelService {
 
             String s = "17962. มณี\u200B  ธน\u200Bมโน\u200Bสุข";
             String s1 = "17962. มณี ธนมโนสุข";
+            String s2 = "290.นลพัฒน์?เชียงอินทร์";
 
             try {
                 List<OrderEntity> orderList = orderRepository.findByRecipientNameIgnoreSpace(orderRequest.getRecipientName().trim());

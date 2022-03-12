@@ -177,6 +177,16 @@ class CabsatApplicationTests {
 		}
 	}
 
+	@Test
+	void test_contains_1() throws Exception {
+		String text = "consignment_no";
+		if(text.contains("con")){
+			System.out.println("text : "+text);
+		}else{
+			System.out.println("else");
+		}
+	}
+
 
 
 }

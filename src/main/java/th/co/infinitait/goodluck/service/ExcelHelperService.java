@@ -125,37 +125,47 @@ public class ExcelHelperService {
             List<OrderRequest> orderRequestList = new ArrayList<>();
 
             boolean isHeader = true;
-            int countHeader = 0;
+            CellReference crParcelCode = null;
+            CellReference crRecipientName = null;
             while (rows.hasNext()) {
                 Row currentRow = rows.next();
 
-//                if("kerry".equalsIgnoreCase(transportationService)) {
-//                    if(countHeader < 5){
-//                        countHeader++;
-//                        continue;
-//                    }
-//                }else{
-//                    // skip header
-//                    if (isHeader) {
-//                        isHeader = false;
-//                        continue;
-//                    }
-//                }
-                // skip header
-                if (isHeader) {
-                    isHeader = false;
-                    continue;
-                }
-
                 OrderRequest orderRequest = new OrderRequest();
 
-                CellReference cr = new CellReference("A"); // รหัสพัสดุ
                 if("kerry".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("A"); // รหัสพัสดุ
+                    if(isHeader) {
+                        isHeader = false;
+                        CellReference crHeader = new CellReference("A");// check header
+                        Cell cellHeader = currentRow.getCell(crHeader.getCol());
+                        CellValue cellValueHeader = evaluator.evaluate(cellHeader);
+                        String cellA = getValueString(cellValueHeader);
+                        CellReference crBHeader = new CellReference("B");// check header
+                        Cell cellBHeader = currentRow.getCell(crBHeader.getCol());
+                        CellValue cellBValueHeader = evaluator.evaluate(cellBHeader);
+                        String cellB = getValueString(cellBValueHeader);
+                        if (cellA.contains("consignment")) {
+                            crParcelCode = new CellReference("A"); // รหัสพัสดุ
+                            crRecipientName = new CellReference("B"); // รหัสพัสดุ
+                            continue;
+                        } else {
+                            if(cellA.contains("KEX")) {
+                                crParcelCode = new CellReference("A"); // รหัสพัสดุ
+                                crRecipientName = new CellReference("C"); // รหัสพัสดุ
+                            }else if(cellB.contains("KEX")) {
+                                crParcelCode = new CellReference("B"); // รหัสพัสดุ
+                                crRecipientName = new CellReference("E"); // รหัสพัสดุ
+                            }
+                        }
+                    }
                 }else if("flash".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("B"); // รหัสพัสดุ
+                    if(isHeader){
+                        isHeader = false;
+                        continue;
+                    }
+                    crParcelCode = new CellReference("B"); // รหัสพัสดุ
+                    crRecipientName = new CellReference("C"); // ชื่อผู้รับ
                 }
-                Cell cell = currentRow.getCell(cr.getCol());
+                Cell cell = currentRow.getCell(crParcelCode.getCol());
                 CellValue cellValue = evaluator.evaluate(cell);
                 String parcelCode = getValueString(cellValue);
                 orderRequest.setParcelCode(parcelCode);
@@ -164,16 +174,14 @@ public class ExcelHelperService {
                     continue;
                 }
 
-                cr = new CellReference("C"); // ชื่อผู้รับ
-                if("kerry".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("B"); // รหัสพัสดุ
-                }else if("flash".equalsIgnoreCase(transportationService)){
-                    cr = new CellReference("C"); // รหัสพัสดุ
-                }
-                cell = currentRow.getCell(cr.getCol());
+                cell = currentRow.getCell(crRecipientName.getCol());
                 cellValue = evaluator.evaluate(cell);
                 String recipientName = getValueString(cellValue);
                 orderRequest.setRecipientName(recipientName);
+
+                if(StringUtils.isEmpty(recipientName)){
+                    continue;
+                }
 
                 orderRequestList.add(orderRequest);
             }
