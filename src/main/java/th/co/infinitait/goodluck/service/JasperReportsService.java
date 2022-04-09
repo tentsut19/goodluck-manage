@@ -39,6 +39,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -335,6 +337,16 @@ public class JasperReportsService {
 									transportResponse.setAddress2("ตำบล" + address1[1]);
 								}
 							}
+							if(StringUtils.isEmpty(transportResponse.getAddress1())){
+								address1 = address.split("เขต");
+								if (address1.length == 2) {
+									transportResponse.setAddress1(address1[0]);
+									transportResponse.setAddress2("เขต" + address1[1]);
+								}
+							}
+							if(StringUtils.isEmpty(transportResponse.getAddress1())){
+								transportResponse.setAddress1(address);
+							}
 							transportResponse.setProduct(orderEntity.getProductDraftName()+" "+orderEntity.getQuantity());
 						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
 							if("cod".equalsIgnoreCase(orderEntity.getPaymentChannel())) {
@@ -344,15 +356,19 @@ public class JasperReportsService {
 							transportResponse.setAddress1(address);
 						}
 						if (!StringUtils.isEmpty(customerEntity.getAddress())) {
-							String[] postalCodes = customerEntity.getAddress().split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
-							String postalCode = postalCodes[postalCodes.length - 1];
-							if (postalCode.length() == 5) {
-								transportResponse.setPostalCode(postalCode);
+							String postalCode = "";
+							Pattern p = Pattern.compile("[0-9๐-๙]{5}");
+							Matcher m = p.matcher(customerEntity.getAddress());
+							while (m.find()) {
+								postalCode = m.group();
 							}
+							transportResponse.setPostalCode(postalCode);
 						}
 						transportResponse.setPhoneNumber(customerEntity.getPhoneNumber());
 					}
-					transportResponse.setCod(orderEntity.getTotalAmount());
+					if("cod".equalsIgnoreCase(orderEntity.getPaymentChannel())) {
+						transportResponse.setCod(orderEntity.getTotalAmount());
+					}
 
 					float weightKg = 1f;
 					List<OrderProductEntity> orderProductEntityList = orderProductRepository.findByOrderCode(orderEntity.getCode());
