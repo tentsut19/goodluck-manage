@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isNumeric;
@@ -187,6 +188,44 @@ class CabsatApplicationTests {
 		}
 	}
 
+	@Test
+	void test_contains_2() throws Exception {
+		String text = "Cod-119.00 93/6/ ม. 6 . ต. บางโทรัด อ. เมือง จ. สมุดสาคร  74000 (ส่งของร้านดอกไม้พวงมาลัย ข้างเซเว่นฝั่งวัดเกตุม)";
+//		String[] postalCodes = text.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
+//		String[] postalCodes = text.split("\\d{5}");
+// [a-zA-Z ]{20}
+//		String postalCode =text.replaceAll("\\d{5}","");
+//		System.out.println(postalCode);
 
+//		String[] postalCodes = text.substring("@#@");
+//
+//		postalCode = postalCodes[postalCodes.length - 1].trim();
+//		if (postalCode.length() == 5) {
+//			System.out.println("else");
+//		}
+
+		text = "30/134 ม.พฤกษาวิลล์ 5 ถนนประชาร่วมใจ  แขวงมีนบุรี เขตมีนบุรี กทม.10510 (เข้ามาในหมู่บ้าน ซอย 10 หลังที่ 3 ซ้ายมือ)";
+//		text = "๗๔ม,๕ต,ตาดกลอยอ,หล่มเก่าจ,เพชรบูรณ์๖๗๑๒๐";
+
+		Pattern p = Pattern.compile("[0-9๐-๙]{5}");
+		Matcher m = p.matcher(text);
+		while (m.find()) {
+			System.out.println(m.group());
+		}
+	}
+
+	@Test
+	void test_contains_3() throws Exception {
+		String text = "30/134 ม.พฤกษาวิลล์ 5 ถนนประชาร่วมใจ  แขวงมีนบุรี เขตมีนบุรี กทม.10510 (เข้ามาในหมู่บ้าน ซอย 10 หลังที่ 3 ซ้ายมือ)";
+		String[] postalCodes = text.split("[^0-9]{5}");
+// [a-zA-Z ]{20}
+//		String postalCodes =text.replaceAll("[^\\d]{5}","");
+//		System.out.println(postalCodes);
+
+		String postalCode = postalCodes[postalCodes.length - 1].trim();
+		if (postalCode.length() == 5) {
+			System.out.println("else");
+		}
+	}
 
 }

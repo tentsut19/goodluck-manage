@@ -314,6 +314,9 @@ public class JasperReportsService {
 					TransportResponse transportResponse = new TransportResponse();
 					transportResponse.setNo(no);
 					transportResponse.setConsigneeName(orderEntity.getRecipientName());
+					if ("flash".equalsIgnoreCase(request.getTransport())) {
+						transportResponse.setPaymentMethod("ชำระโดยผู้ส่ง");
+					}
 					if (orderEntity.getCustomer() != null) {
 						CustomerEntity customerEntity = orderEntity.getCustomer();
 						String address = customerEntity.getAddress();
@@ -389,7 +392,8 @@ public class JasperReportsService {
 						if ("kerry".equalsIgnoreCase(request.getTransport())) {
 							transportResponse.setProduct(product.toString());
 						}else if ("flash".equalsIgnoreCase(request.getTransport())) {
-							transportResponse.setCustomerOrderNumber(product.toString());
+							transportResponse.setRemark(product.toString());
+//							transportResponse.setCustomerOrderNumber(product.toString());
 //							for (OrderProductEntity orderProductEntity : orderProductEntityList) {
 //								List<SettingProductEntity> settingProductEntityList = settingProductRepository.findByName(orderProductEntity.getProductName());
 //								if (!CollectionUtils.isEmpty(settingProductEntityList)) {

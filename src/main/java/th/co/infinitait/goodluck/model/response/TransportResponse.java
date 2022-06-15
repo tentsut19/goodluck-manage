@@ -33,4 +33,6 @@ public class TransportResponse {
     private float heightCm;
     @Builder.Default
     private String productType = "Standard";
+    private String paymentMethod;
+    private String remark;
 }
