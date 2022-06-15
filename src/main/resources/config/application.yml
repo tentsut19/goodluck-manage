@@ -100,12 +100,6 @@ logging:
 #    level.org.springframework.request.server.MessageTracing.received: TRACE
 
 
-#  level:
-#    org.springframework.web: ERROR
-#    com.howtodoinjava: DEBUG
-#    org.hibernate: ERROR
-
-
 
 #logging:
 #  file: 'log/cabsat.log'
