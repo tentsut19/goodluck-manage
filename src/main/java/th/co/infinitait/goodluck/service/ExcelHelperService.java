@@ -145,15 +145,18 @@ public class ExcelHelperService {
                         String cellB = getValueString(cellBValueHeader);
                         if (cellA.contains("consignment")) {
                             crParcelCode = new CellReference("A"); // รหัสพัสดุ
-                            crRecipientName = new CellReference("B"); // รหัสพัสดุ
+                            crRecipientName = new CellReference("B"); // ผู้ส่ง
                             continue;
                         } else {
                             if(cellA.contains("KEX")) {
                                 crParcelCode = new CellReference("A"); // รหัสพัสดุ
-                                crRecipientName = new CellReference("C"); // รหัสพัสดุ
+                                crRecipientName = new CellReference("C"); // ผู้ส่ง
                             }else if(cellB.contains("KEX")) {
                                 crParcelCode = new CellReference("B"); // รหัสพัสดุ
-                                crRecipientName = new CellReference("E"); // รหัสพัสดุ
+                                crRecipientName = new CellReference("E"); // ผู้ส่ง
+                            }else{
+                                crParcelCode = new CellReference("B"); // รหัสพัสดุ
+                                crRecipientName = new CellReference("E"); // ผู้ส่ง
                             }
                         }
                     }
